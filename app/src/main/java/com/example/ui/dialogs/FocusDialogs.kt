@@ -35,14 +35,17 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.theme.PilotBorder
-import com.example.ui.theme.PilotDarkGreen
-import com.example.ui.theme.PilotFailure
-import com.example.ui.theme.PilotGreenContainer
-import com.example.ui.theme.PilotTextBody
-import com.example.ui.theme.PilotTextMuted
-import com.example.ui.theme.PilotTextPrimary
-import com.example.ui.theme.PilotTextSecondary
+import com.example.ui.components.GoldenGradientButton
+import com.example.ui.theme.BrownIconBorder
+import com.example.ui.theme.CardSubtleBorder
+import com.example.ui.theme.DarkChocolateHeadings
+import com.example.ui.theme.GoldenAmberPrimary
+import com.example.ui.theme.SoftCreamCard
+import com.example.ui.theme.WarmBrownBody
+import com.example.ui.theme.WarmBrownMuted
+import com.example.ui.theme.WarmBrownSecondary
+import com.example.ui.theme.WarmCrimsonFailure
+import com.example.ui.theme.WarmPillBg
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -66,7 +69,7 @@ fun PauseReasonDialog(
                 text = "Pause Focus Session",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = PilotTextPrimary
+                color = DarkChocolateHeadings
             )
         },
         text = {
@@ -74,7 +77,7 @@ fun PauseReasonDialog(
                 Text(
                     text = "Discipline rule: Record why you paused to stay conscious of interruptions.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = PilotTextSecondary
+                    color = WarmBrownSecondary
                 )
                 Spacer(modifier = Modifier.height(14.dp))
 
@@ -86,13 +89,13 @@ fun PauseReasonDialog(
                         val isSelected = reason == item
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
+                                .clip(RoundedCornerShape(10.dp))
                                 .border(
                                     1.dp,
-                                    if (isSelected) PilotDarkGreen else PilotBorder,
-                                    RoundedCornerShape(8.dp)
+                                    if (isSelected) GoldenAmberPrimary else CardSubtleBorder,
+                                    RoundedCornerShape(10.dp)
                                 )
-                                .background(if (isSelected) PilotGreenContainer else Color.Transparent)
+                                .background(if (isSelected) WarmPillBg else SoftCreamCard)
                                 .clickable { reason = item }
                                 .padding(horizontal = 12.dp, vertical = 8.dp)
                         ) {
@@ -100,7 +103,7 @@ fun PauseReasonDialog(
                                 text = item,
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isSelected) PilotDarkGreen else PilotTextPrimary
+                                color = if (isSelected) DarkChocolateHeadings else WarmBrownBody
                             )
                         }
                     }
@@ -111,48 +114,43 @@ fun PauseReasonDialog(
                 OutlinedTextField(
                     value = reason,
                     onValueChange = { reason = it },
-                    placeholder = { Text("Or type custom reason...", color = PilotTextMuted) },
+                    placeholder = { Text("Or type custom reason...", color = WarmBrownMuted) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("pause_reason_input"),
                     shape = RoundedCornerShape(10.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = PilotDarkGreen,
-                        unfocusedBorderColor = PilotBorder,
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                        focusedBorderColor = GoldenAmberPrimary,
+                        unfocusedBorderColor = CardSubtleBorder,
+                        focusedContainerColor = SoftCreamCard,
+                        unfocusedContainerColor = SoftCreamCard
                     )
                 )
             }
         },
         confirmButton = {
-            Button(
+            GoldenGradientButton(
+                text = "Pause Timer",
                 onClick = {
                     val finalReason = if (reason.isBlank()) "Quick pause" else reason.trim()
                     onConfirmPause(finalReason)
                 },
-                modifier = Modifier.testTag("confirm_pause_button"),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = PilotDarkGreen,
-                    contentColor = Color.White
-                )
-            ) {
-                Text("Pause Timer", fontWeight = FontWeight.Bold)
-            }
+                height = 44.dp,
+                modifier = Modifier.testTag("confirm_pause_button")
+            )
         },
         dismissButton = {
             OutlinedButton(
                 onClick = onDismiss,
                 shape = RoundedCornerShape(10.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder)
+                border = androidx.compose.foundation.BorderStroke(1.dp, CardSubtleBorder)
             ) {
-                Text("Keep Working", color = PilotTextPrimary, fontWeight = FontWeight.SemiBold)
+                Text("Keep Working", color = WarmBrownBody, fontWeight = FontWeight.SemiBold)
             }
         },
-        containerColor = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(16.dp)
+        containerColor = SoftCreamCard,
+        shape = RoundedCornerShape(18.dp)
     )
 }
 
@@ -178,7 +176,7 @@ fun GiveUpReasonDialog(
                 text = "Abandon Focus Session?",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = PilotFailure
+                color = WarmCrimsonFailure
             )
         },
         text = {
@@ -186,7 +184,7 @@ fun GiveUpReasonDialog(
                 Text(
                     text = "Giving up will record an abandoned session in your history. State your reason honestly to learn from it:",
                     style = MaterialTheme.typography.bodySmall,
-                    color = PilotTextSecondary
+                    color = WarmBrownSecondary
                 )
                 Spacer(modifier = Modifier.height(14.dp))
 
@@ -198,13 +196,13 @@ fun GiveUpReasonDialog(
                         val isSelected = reason == item
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
+                                .clip(RoundedCornerShape(10.dp))
                                 .border(
                                     1.dp,
-                                    if (isSelected) PilotFailure else PilotBorder,
-                                    RoundedCornerShape(8.dp)
+                                    if (isSelected) WarmCrimsonFailure else CardSubtleBorder,
+                                    RoundedCornerShape(10.dp)
                                 )
-                                .background(if (isSelected) Color(0xFFFEE2E2) else Color.Transparent)
+                                .background(if (isSelected) Color(0xFFFDE8E8) else SoftCreamCard)
                                 .clickable { reason = item }
                                 .padding(horizontal = 12.dp, vertical = 8.dp)
                         ) {
@@ -212,7 +210,7 @@ fun GiveUpReasonDialog(
                                 text = item,
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                color = if (isSelected) PilotFailure else PilotTextPrimary
+                                color = if (isSelected) WarmCrimsonFailure else WarmBrownBody
                             )
                         }
                     }
@@ -223,17 +221,17 @@ fun GiveUpReasonDialog(
                 OutlinedTextField(
                     value = reason,
                     onValueChange = { reason = it },
-                    placeholder = { Text("Short honest reason...", color = PilotTextMuted) },
+                    placeholder = { Text("Short honest reason...", color = WarmBrownMuted) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("abandon_reason_input"),
                     shape = RoundedCornerShape(10.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = PilotFailure,
-                        unfocusedBorderColor = PilotBorder,
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                        focusedBorderColor = WarmCrimsonFailure,
+                        unfocusedBorderColor = CardSubtleBorder,
+                        focusedContainerColor = SoftCreamCard,
+                        unfocusedContainerColor = SoftCreamCard
                     )
                 )
             }
@@ -247,7 +245,7 @@ fun GiveUpReasonDialog(
                 modifier = Modifier.testTag("confirm_abandon_button"),
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = PilotFailure,
+                    containerColor = WarmCrimsonFailure,
                     contentColor = Color.White
                 )
             ) {
@@ -258,13 +256,13 @@ fun GiveUpReasonDialog(
             OutlinedButton(
                 onClick = onDismiss,
                 shape = RoundedCornerShape(10.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder)
+                border = androidx.compose.foundation.BorderStroke(1.dp, CardSubtleBorder)
             ) {
-                Text("Resume Focus", color = PilotTextPrimary, fontWeight = FontWeight.SemiBold)
+                Text("Resume Focus", color = WarmBrownBody, fontWeight = FontWeight.SemiBold)
             }
         },
-        containerColor = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(16.dp)
+        containerColor = SoftCreamCard,
+        shape = RoundedCornerShape(18.dp)
     )
 }
 
@@ -280,7 +278,7 @@ fun TaskCompletionDialog(
                 text = "Session Finished",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = PilotDarkGreen
+                color = DarkChocolateHeadings
             )
         },
         text = {
@@ -289,7 +287,7 @@ fun TaskCompletionDialog(
                     text = "Focused on: \"$taskTitle\"",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = PilotTextPrimary
+                    color = DarkChocolateHeadings
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
@@ -297,41 +295,36 @@ fun TaskCompletionDialog(
                     style = MaterialTheme.typography.headlineSmall,
                     fontSize = 17.sp,
                     fontWeight = FontWeight.Bold,
-                    color = PilotTextPrimary
+                    color = DarkChocolateHeadings
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "If you need more time, select 'No' to keep it active for another focus session.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = PilotTextSecondary
+                    color = WarmBrownSecondary
                 )
             }
         },
         confirmButton = {
-            Button(
+            GoldenGradientButton(
+                text = "Yes, Task Completed!",
                 onClick = { onConfirmCompleted(true) },
-                modifier = Modifier.testTag("task_completed_yes_button"),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = PilotDarkGreen,
-                    contentColor = Color.White
-                )
-            ) {
-                Text("Yes, Task Completed!", fontWeight = FontWeight.Bold)
-            }
+                height = 44.dp,
+                modifier = Modifier.testTag("task_completed_yes_button")
+            )
         },
         dismissButton = {
             OutlinedButton(
                 onClick = { onConfirmCompleted(false) },
                 modifier = Modifier.testTag("task_completed_no_button"),
                 shape = RoundedCornerShape(10.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder)
+                border = androidx.compose.foundation.BorderStroke(1.dp, CardSubtleBorder)
             ) {
-                Text("No, Need Another Session", color = PilotTextPrimary, fontWeight = FontWeight.SemiBold)
+                Text("No, Need Another Session", color = WarmBrownBody, fontWeight = FontWeight.SemiBold)
             }
         },
-        containerColor = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(16.dp)
+        containerColor = SoftCreamCard,
+        shape = RoundedCornerShape(18.dp)
     )
 }
 
@@ -347,7 +340,7 @@ fun UnfinishedWorkDisciplineDialog(
                 text = "Unfinished Work",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
-                color = PilotDarkGreen
+                color = DarkChocolateHeadings
             )
         },
         text = {
@@ -356,41 +349,35 @@ fun UnfinishedWorkDisciplineDialog(
                     text = "“You still have unfinished work. Complete one more focus session before ending today.”",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Medium,
-                    color = PilotTextPrimary
+                    color = DarkChocolateHeadings
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = "You can still choose to end now, but the day will be recorded with unfinished work.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = PilotTextSecondary
+                    color = WarmBrownSecondary
                 )
             }
         },
         confirmButton = {
-            Button(
+            GoldenGradientButton(
+                text = "Complete 1 More Session",
                 onClick = onContinueWork,
-                modifier = Modifier.testTag("do_one_more_session_button"),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = PilotDarkGreen,
-                    contentColor = Color.White
-                )
-            ) {
-                Text("Complete 1 More Session", fontWeight = FontWeight.Bold)
-            }
+                height = 44.dp,
+                modifier = Modifier.testTag("do_one_more_session_button")
+            )
         },
         dismissButton = {
             OutlinedButton(
                 onClick = onFinishAnyway,
                 modifier = Modifier.testTag("finish_anyway_button"),
                 shape = RoundedCornerShape(10.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder)
+                border = androidx.compose.foundation.BorderStroke(1.dp, CardSubtleBorder)
             ) {
-                Text("End Workday Anyway", color = PilotTextPrimary, fontWeight = FontWeight.SemiBold)
+                Text("End Workday Anyway", color = WarmBrownBody, fontWeight = FontWeight.SemiBold)
             }
         },
-        containerColor = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(16.dp)
+        containerColor = SoftCreamCard,
+        shape = RoundedCornerShape(18.dp)
     )
 }
-

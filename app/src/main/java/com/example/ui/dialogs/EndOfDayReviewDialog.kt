@@ -1,6 +1,7 @@
 package com.example.ui.dialogs
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,8 +14,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -29,23 +28,27 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.data.model.DailyScoreResult
+import com.example.ui.components.GoldenGradientButton
 import com.example.ui.components.RewardPointsBadge
 import com.example.ui.components.ScoreBadge
-import com.example.ui.theme.PilotBorder
-import com.example.ui.theme.PilotDarkGreen
-import com.example.ui.theme.PilotFailure
-import com.example.ui.theme.PilotGreenContainer
-import com.example.ui.theme.PilotSuccess
-import com.example.ui.theme.PilotTextMuted
-import com.example.ui.theme.PilotTextPrimary
-import com.example.ui.theme.PilotTextSecondary
+import com.example.ui.theme.CardSubtleBorder
+import com.example.ui.theme.DarkChocolateHeadings
+import com.example.ui.theme.GoldenAmberPrimary
+import com.example.ui.theme.SoftCreamCard
+import com.example.ui.theme.WarmAmberWarning
+import com.example.ui.theme.WarmBrownBody
+import com.example.ui.theme.WarmBrownMuted
+import com.example.ui.theme.WarmBrownSecondary
+import com.example.ui.theme.WarmCrimsonFailure
+import com.example.ui.theme.WarmOliveSuccess
+import com.example.ui.theme.WarmPillBg
 
 @Composable
 fun EndOfDayReviewDialog(
@@ -72,9 +75,9 @@ fun EndOfDayReviewDialog(
             modifier = Modifier
                 .widthIn(max = 600.dp)
                 .fillMaxWidth(0.92f),
-            shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surface,
-            border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
+            shape = RoundedCornerShape(18.dp),
+            color = SoftCreamCard,
+            border = androidx.compose.foundation.BorderStroke(1.dp, CardSubtleBorder),
             shadowElevation = 2.dp
         ) {
             Column(
@@ -87,12 +90,12 @@ fun EndOfDayReviewDialog(
                     text = "End-of-Day Review",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = PilotTextPrimary
+                    color = DarkChocolateHeadings
                 )
                 Text(
                     text = "Reflect on today, calculate points & score, and plan tomorrow's 3 tasks.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = PilotTextSecondary
+                    color = WarmBrownSecondary
                 )
 
                 Spacer(modifier = Modifier.height(18.dp))
@@ -102,23 +105,23 @@ fun EndOfDayReviewDialog(
                     text = "1. What did I complete today?",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = PilotTextPrimary
+                    color = DarkChocolateHeadings
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 OutlinedTextField(
                     value = completedWhat,
                     onValueChange = { completedWhat = it },
-                    placeholder = { Text("Key outcomes, deliverables, and wins...", color = PilotTextMuted) },
+                    placeholder = { Text("Key outcomes, deliverables, and wins...", color = WarmBrownMuted) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("review_completed_input"),
                     minLines = 2,
                     shape = RoundedCornerShape(10.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = PilotDarkGreen,
-                        unfocusedBorderColor = PilotBorder,
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                        focusedBorderColor = GoldenAmberPrimary,
+                        unfocusedBorderColor = CardSubtleBorder,
+                        focusedContainerColor = SoftCreamCard,
+                        unfocusedContainerColor = SoftCreamCard
                     )
                 )
 
@@ -129,23 +132,23 @@ fun EndOfDayReviewDialog(
                     text = "2. What distracted me today?",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = PilotTextPrimary
+                    color = DarkChocolateHeadings
                 )
                 Spacer(modifier = Modifier.height(6.dp))
                 OutlinedTextField(
                     value = distraction,
                     onValueChange = { distraction = it },
-                    placeholder = { Text("Social media, unstructured calls, tab-switching...", color = PilotTextMuted) },
+                    placeholder = { Text("Social media, unstructured calls, tab-switching...", color = WarmBrownMuted) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("review_distraction_input"),
                     singleLine = true,
                     shape = RoundedCornerShape(10.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = PilotDarkGreen,
-                        unfocusedBorderColor = PilotBorder,
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                        focusedBorderColor = GoldenAmberPrimary,
+                        unfocusedBorderColor = CardSubtleBorder,
+                        focusedContainerColor = SoftCreamCard,
+                        unfocusedContainerColor = SoftCreamCard
                     )
                 )
 
@@ -156,30 +159,30 @@ fun EndOfDayReviewDialog(
                     text = "3. What are tomorrow’s three tasks?",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = PilotTextPrimary
+                    color = DarkChocolateHeadings
                 )
                 Text(
                     text = "Plan 3 clear tasks to be ready tomorrow morning.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = PilotTextSecondary
+                    color = WarmBrownSecondary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
                     value = tomorrow1,
                     onValueChange = { tomorrow1 = it },
-                    label = { Text("Task 1") },
-                    placeholder = { Text("e.g. Finish client proposal deliverable", color = PilotTextMuted) },
+                    label = { Text("Task 1", color = WarmBrownSecondary) },
+                    placeholder = { Text("e.g. Finish client proposal deliverable", color = WarmBrownMuted) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("review_tomorrow_1_input"),
                     shape = RoundedCornerShape(10.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = PilotDarkGreen,
-                        unfocusedBorderColor = PilotBorder,
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                        focusedBorderColor = GoldenAmberPrimary,
+                        unfocusedBorderColor = CardSubtleBorder,
+                        focusedContainerColor = SoftCreamCard,
+                        unfocusedContainerColor = SoftCreamCard
                     )
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -187,18 +190,18 @@ fun EndOfDayReviewDialog(
                 OutlinedTextField(
                     value = tomorrow2,
                     onValueChange = { tomorrow2 = it },
-                    label = { Text("Task 2") },
-                    placeholder = { Text("e.g. Send five tailored outreach emails", color = PilotTextMuted) },
+                    label = { Text("Task 2", color = WarmBrownSecondary) },
+                    placeholder = { Text("e.g. Send five tailored outreach emails", color = WarmBrownMuted) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("review_tomorrow_2_input"),
                     shape = RoundedCornerShape(10.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = PilotDarkGreen,
-                        unfocusedBorderColor = PilotBorder,
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                        focusedBorderColor = GoldenAmberPrimary,
+                        unfocusedBorderColor = CardSubtleBorder,
+                        focusedContainerColor = SoftCreamCard,
+                        unfocusedContainerColor = SoftCreamCard
                     )
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -206,18 +209,18 @@ fun EndOfDayReviewDialog(
                 OutlinedTextField(
                     value = tomorrow3,
                     onValueChange = { tomorrow3 = it },
-                    label = { Text("Task 3") },
-                    placeholder = { Text("e.g. Reply to inbox and send weekly invoice", color = PilotTextMuted) },
+                    label = { Text("Task 3", color = WarmBrownSecondary) },
+                    placeholder = { Text("e.g. Reply to inbox and send weekly invoice", color = WarmBrownMuted) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("review_tomorrow_3_input"),
                     shape = RoundedCornerShape(10.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = PilotDarkGreen,
-                        unfocusedBorderColor = PilotBorder,
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                        focusedBorderColor = GoldenAmberPrimary,
+                        unfocusedBorderColor = CardSubtleBorder,
+                        focusedContainerColor = SoftCreamCard,
+                        unfocusedContainerColor = SoftCreamCard
                     )
                 )
 
@@ -233,12 +236,13 @@ fun EndOfDayReviewDialog(
                             .weight(1f)
                             .height(48.dp),
                         shape = RoundedCornerShape(10.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder)
+                        border = androidx.compose.foundation.BorderStroke(1.dp, CardSubtleBorder)
                     ) {
-                        Text("Cancel", color = PilotTextPrimary, fontWeight = FontWeight.SemiBold)
+                        Text("Cancel", color = WarmBrownBody, fontWeight = FontWeight.SemiBold)
                     }
 
-                    Button(
+                    GoldenGradientButton(
+                        text = "Finalize & Score",
                         onClick = {
                             onSubmitReview(
                                 completedWhat,
@@ -248,18 +252,11 @@ fun EndOfDayReviewDialog(
                                 tomorrow3
                             )
                         },
+                        height = 48.dp,
                         modifier = Modifier
                             .weight(2f)
-                            .height(48.dp)
-                            .testTag("submit_review_button"),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = PilotDarkGreen,
-                            contentColor = Color.White
-                        )
-                    ) {
-                        Text("Finalize & Score", fontWeight = FontWeight.Bold)
-                    }
+                            .testTag("submit_review_button")
+                    )
                 }
             }
         }
@@ -278,9 +275,9 @@ fun ReviewSummaryDialog(
             modifier = Modifier
                 .widthIn(max = 480.dp)
                 .fillMaxWidth(),
-            shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surface,
-            border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
+            shape = RoundedCornerShape(18.dp),
+            color = SoftCreamCard,
+            border = androidx.compose.foundation.BorderStroke(1.dp, CardSubtleBorder),
             shadowElevation = 2.dp
         ) {
             Column(
@@ -292,13 +289,13 @@ fun ReviewSummaryDialog(
                     text = "Workday Complete",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = PilotTextPrimary
+                    color = DarkChocolateHeadings
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = "Here is your discipline & reward summary for today:",
                     style = MaterialTheme.typography.bodySmall,
-                    color = PilotTextSecondary
+                    color = WarmBrownSecondary
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -306,8 +303,9 @@ fun ReviewSummaryDialog(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(PilotGreenContainer)
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(WarmPillBg)
+                        .border(1.dp, CardSubtleBorder, RoundedCornerShape(14.dp))
                         .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
@@ -316,7 +314,7 @@ fun ReviewSummaryDialog(
                             text = "${scoreResult.totalScore} / 5",
                             style = MaterialTheme.typography.headlineLarge,
                             fontWeight = FontWeight.Bold,
-                            color = PilotDarkGreen
+                            color = DarkChocolateHeadings
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         ScoreBadge(score = scoreResult.totalScore, ratingLabel = scoreResult.ratingLabel)
@@ -332,9 +330,9 @@ fun ReviewSummaryDialog(
                                 text = if (ptsDelta >= 0) "Today: +$ptsDelta pts" else "Today: $ptsDelta pts",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = if (ptsDelta >= 0) PilotSuccess else PilotFailure
+                                color = if (ptsDelta >= 0) WarmOliveSuccess else WarmCrimsonFailure
                             )
-                            Text(text = "•", color = PilotTextSecondary)
+                            Text(text = "•", color = WarmBrownSecondary)
                             RewardPointsBadge(points = totalRewardPoints)
                         }
 
@@ -343,7 +341,7 @@ fun ReviewSummaryDialog(
                             text = if (scoreResult.isSuccessful) "🔥 Streak: $currentStreak days" else "Streak reset to 0 (Score < 4)",
                             style = MaterialTheme.typography.labelMedium,
                             fontWeight = FontWeight.SemiBold,
-                            color = if (scoreResult.isSuccessful) PilotSuccess else PilotTextMuted
+                            color = if (scoreResult.isSuccessful) WarmOliveSuccess else WarmBrownMuted
                         )
                     }
                 }
@@ -363,25 +361,17 @@ fun ReviewSummaryDialog(
                 Text(
                     text = "Points Breakdown: +$completedBonus pts (${scoreResult.completedTasksCount} done) - $missedPenalty pts (${scoreResult.uncompletedTasksCount} missed)",
                     style = MaterialTheme.typography.bodySmall,
-                    color = PilotTextSecondary
+                    color = WarmBrownSecondary
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                Button(
+                GoldenGradientButton(
+                    text = "Done",
                     onClick = onDismiss,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .testTag("dismiss_summary_button"),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = PilotDarkGreen,
-                        contentColor = Color.White
-                    )
-                ) {
-                    Text("Done", fontWeight = FontWeight.Bold)
-                }
+                    height = 48.dp,
+                    modifier = Modifier.testTag("dismiss_summary_button")
+                )
             }
         }
     }
@@ -399,13 +389,13 @@ private fun ScoreBreakdownRow(label: String, earned: Boolean) {
         Text(
             text = label,
             style = MaterialTheme.typography.bodySmall,
-            color = PilotTextPrimary
+            color = WarmBrownBody
         )
         Text(
             text = if (earned) "+1 pt" else "0 pt",
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
-            color = if (earned) PilotSuccess else PilotTextMuted
+            color = if (earned) WarmOliveSuccess else WarmBrownMuted
         )
     }
 }

@@ -68,6 +68,69 @@ class FocusLockRepository(
         preferences.updateRewardPoints(delta)
     }
 
+    fun setTotalRewardPoints(points: Int) {
+        preferences.setTotalRewardPoints(points)
+    }
+
+    suspend fun toggleTaskCompleteForDate(date: String, taskType: TaskType): Boolean {
+        val plan = getOrCreateDailyPlan(date)
+        val currentlyDone = plan.isTaskCompleted(taskType)
+        val newDone = !currentlyDone
+
+        val updatedPlan = when (taskType) {
+            TaskType.TASK_1 -> plan.copy(task1Completed = newDone)
+            TaskType.TASK_2 -> plan.copy(task2Completed = newDone)
+            TaskType.TASK_3 -> plan.copy(task3Completed = newDone)
+        }
+
+        // If day was already scored / finished, recalculate score and reward delta
+        val finalizedPlan = if (updatedPlan.isWorkdayFinished) {
+            val sessions = dao.getFocusSessionsForDateSync(date)
+            val completedSessionsCount = sessions.count { it.isCompleted }
+            val scoreResult = DailyScoreResult.evaluate(
+                plannedThreeTasks = updatedPlan.areAllThreeTasksPlanned,
+                startedOnTime = updatedPlan.isStartedOnTime,
+                completedTargetSessions = completedSessionsCount >= userSettings.value.dailyFocusTargetSessions,
+                completedTasksCount = updatedPlan.completedTasksCount,
+                totalTasksCount = 3,
+                plannedTomorrow = updatedPlan.tomorrowTask1.isNotBlank() || updatedPlan.tomorrowTask2.isNotBlank() || updatedPlan.tomorrowTask3.isNotBlank() || updatedPlan.completedReview
+            )
+            updatedPlan.copy(
+                calculatedScore = scoreResult.totalScore,
+                rewardPointsEarned = scoreResult.todayRewardPointsDelta
+            )
+        } else {
+            updatedPlan
+        }
+
+        dao.insertDailyPlan(finalizedPlan)
+
+        // Adjust reward points
+        val delta = if (newDone) 10 else -10
+        updateRewardPoints(delta)
+        return newDone
+    }
+
+    suspend fun updateTaskForDate(date: String, taskType: TaskType, title: String, durationMinutes: Int? = null) {
+        val plan = getOrCreateDailyPlan(date)
+        val cleanTitle = title.trim()
+        val updatedPlan = when (taskType) {
+            TaskType.TASK_1 -> plan.copy(
+                task1Title = cleanTitle,
+                task1DurationMinutes = durationMinutes ?: plan.task1DurationMinutes
+            )
+            TaskType.TASK_2 -> plan.copy(
+                task2Title = cleanTitle,
+                task2DurationMinutes = durationMinutes ?: plan.task2DurationMinutes
+            )
+            TaskType.TASK_3 -> plan.copy(
+                task3Title = cleanTitle,
+                task3DurationMinutes = durationMinutes ?: plan.task3DurationMinutes
+            )
+        }
+        dao.insertDailyPlan(updatedPlan)
+    }
+
     // Active session persistence
     fun saveActiveSession(session: ActiveSessionState) {
         preferences.saveActiveSession(session)

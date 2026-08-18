@@ -25,17 +25,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.model.TaskType
-import com.example.ui.theme.PilotBorder
-import com.example.ui.theme.PilotDarkGreen
-import com.example.ui.theme.PilotFailure
-import com.example.ui.theme.PilotFailureBg
-import com.example.ui.theme.PilotGreenContainer
-import com.example.ui.theme.PilotSuccess
-import com.example.ui.theme.PilotSuccessBg
-import com.example.ui.theme.PilotTextPrimary
-import com.example.ui.theme.PilotTextSecondary
-import com.example.ui.theme.PilotWarning
-import com.example.ui.theme.PilotWarningBg
+import com.example.ui.theme.BrownIconBorder
+import com.example.ui.theme.CardSubtleBorder
+import com.example.ui.theme.DarkChocolateHeadings
+import com.example.ui.theme.GoldenAmberPrimary
+import com.example.ui.theme.SoftCreamCard
+import com.example.ui.theme.WarmAmberWarning
+import com.example.ui.theme.WarmBrownBody
+import com.example.ui.theme.WarmBrownSecondary
+import com.example.ui.theme.WarmCrimsonFailure
+import com.example.ui.theme.WarmFailureBg
+import com.example.ui.theme.WarmOliveSuccess
+import com.example.ui.theme.WarmPillBg
+import com.example.ui.theme.WarmSuccessBg
+import com.example.ui.theme.WarmWarningBg
 
 @Composable
 fun TaskNumberBadge(
@@ -44,13 +47,14 @@ fun TaskNumberBadge(
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(6.dp))
-            .background(PilotGreenContainer)
+            .clip(RoundedCornerShape(8.dp))
+            .background(WarmPillBg)
+            .border(1.dp, CardSubtleBorder, RoundedCornerShape(8.dp))
             .padding(horizontal = 8.dp, vertical = 3.dp)
     ) {
         Text(
             text = taskType.displayName.uppercase(),
-            color = PilotDarkGreen,
+            color = DarkChocolateHeadings,
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold
         )
@@ -65,9 +69,9 @@ fun RewardPointsBadge(
 ) {
     val isPositive = points >= 0
     val (bgColor, textColor, borderColor) = if (isPositive) {
-        Triple(PilotGreenContainer, PilotDarkGreen, PilotSuccess.copy(alpha = 0.4f))
+        Triple(WarmPillBg, GoldenAmberPrimary, CardSubtleBorder)
     } else {
-        Triple(PilotFailureBg, PilotFailure, PilotFailure.copy(alpha = 0.4f))
+        Triple(WarmFailureBg, WarmCrimsonFailure, CardSubtleBorder)
     }
 
     val displayString = if (points > 0) "+$points pts" else if (points < 0) "$points pts" else "0 pts"
@@ -108,8 +112,8 @@ fun TaskDurationChip(
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
-            .background(Color(0xFFF1F5F9))
-            .border(1.dp, PilotBorder, RoundedCornerShape(8.dp))
+            .background(SoftCreamCard)
+            .border(1.dp, CardSubtleBorder, RoundedCornerShape(8.dp))
             .clickable(onClick = onClick)
             .padding(horizontal = 10.dp, vertical = 5.dp),
         contentAlignment = Alignment.Center
@@ -121,12 +125,12 @@ fun TaskDurationChip(
             Icon(
                 imageVector = Icons.Default.Timer,
                 contentDescription = "Set duration",
-                tint = PilotDarkGreen,
+                tint = BrownIconBorder,
                 modifier = Modifier.size(14.dp)
             )
             Text(
                 text = "$durationMinutes min",
-                color = PilotTextPrimary,
+                color = WarmBrownBody,
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold
             )
@@ -141,15 +145,16 @@ fun ScoreBadge(
     modifier: Modifier = Modifier
 ) {
     val (bgColor, textColor) = when {
-        score >= 4 -> PilotSuccessBg to PilotSuccess
-        score == 3 -> PilotWarningBg to PilotWarning
-        else -> PilotFailureBg to PilotFailure
+        score >= 4 -> WarmSuccessBg to WarmOliveSuccess
+        score == 3 -> WarmWarningBg to WarmAmberWarning
+        else -> WarmFailureBg to WarmCrimsonFailure
     }
 
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(6.dp))
+            .clip(RoundedCornerShape(8.dp))
             .background(bgColor)
+            .border(1.dp, CardSubtleBorder, RoundedCornerShape(8.dp))
             .padding(horizontal = 10.dp, vertical = 4.dp)
     ) {
         Text(

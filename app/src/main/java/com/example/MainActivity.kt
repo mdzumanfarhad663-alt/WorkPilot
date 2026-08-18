@@ -18,9 +18,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -47,13 +49,17 @@ import com.example.ui.dialogs.TaskCompletionDialog
 import com.example.ui.dialogs.UnfinishedWorkDisciplineDialog
 import com.example.ui.screens.focus.FocusScreen
 import com.example.ui.screens.history.HistoryScreen
+import com.example.ui.screens.settings.SettingsScreen
 import com.example.ui.screens.setup.FirstTimeSetupScreen
 import com.example.ui.screens.today.TodayScreen
-import com.example.ui.theme.PilotBorder
-import com.example.ui.theme.PilotDarkGreen
-import com.example.ui.theme.PilotGreenContainer
-import com.example.ui.theme.PilotSurface
-import com.example.ui.theme.PilotTextSecondary
+import com.example.ui.theme.BrownIconBorder
+import com.example.ui.theme.CardSubtleBorder
+import com.example.ui.theme.DarkChocolateHeadings
+import com.example.ui.theme.GoldenAmberPrimary
+import com.example.ui.theme.SoftCreamCard
+import com.example.ui.theme.WarmBrownSecondary
+import com.example.ui.theme.WarmIvoryBg
+import com.example.ui.theme.WarmPillBg
 import com.example.ui.theme.WorkPilotTheme
 import com.example.ui.viewmodel.FocusLockUiState
 import com.example.ui.viewmodel.FocusLockViewModel
@@ -170,10 +176,10 @@ fun WorkPilotMainApp(
         contentWindowInsets = WindowInsets.safeDrawing,
         bottomBar = {
             androidx.compose.foundation.layout.Column {
-                HorizontalDivider(thickness = 1.dp, color = PilotBorder)
+                HorizontalDivider(thickness = 1.dp, color = CardSubtleBorder)
                 NavigationBar(
-                    containerColor = PilotSurface,
-                    contentColor = PilotDarkGreen,
+                    containerColor = SoftCreamCard,
+                    contentColor = DarkChocolateHeadings,
                     tonalElevation = 0.dp,
                     modifier = Modifier
                         .navigationBarsPadding()
@@ -196,11 +202,11 @@ fun WorkPilotMainApp(
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = PilotDarkGreen,
-                            selectedTextColor = PilotDarkGreen,
-                            indicatorColor = PilotGreenContainer,
-                            unselectedIconColor = PilotTextSecondary,
-                            unselectedTextColor = PilotTextSecondary
+                            selectedIconColor = DarkChocolateHeadings,
+                            selectedTextColor = DarkChocolateHeadings,
+                            indicatorColor = WarmPillBg,
+                            unselectedIconColor = BrownIconBorder,
+                            unselectedTextColor = WarmBrownSecondary
                         ),
                         modifier = Modifier.testTag("tab_today")
                     )
@@ -222,11 +228,11 @@ fun WorkPilotMainApp(
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = PilotDarkGreen,
-                            selectedTextColor = PilotDarkGreen,
-                            indicatorColor = PilotGreenContainer,
-                            unselectedIconColor = PilotTextSecondary,
-                            unselectedTextColor = PilotTextSecondary
+                            selectedIconColor = DarkChocolateHeadings,
+                            selectedTextColor = DarkChocolateHeadings,
+                            indicatorColor = WarmPillBg,
+                            unselectedIconColor = BrownIconBorder,
+                            unselectedTextColor = WarmBrownSecondary
                         ),
                         modifier = Modifier.testTag("tab_focus")
                     )
@@ -248,13 +254,39 @@ fun WorkPilotMainApp(
                             )
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = PilotDarkGreen,
-                            selectedTextColor = PilotDarkGreen,
-                            indicatorColor = PilotGreenContainer,
-                            unselectedIconColor = PilotTextSecondary,
-                            unselectedTextColor = PilotTextSecondary
+                            selectedIconColor = DarkChocolateHeadings,
+                            selectedTextColor = DarkChocolateHeadings,
+                            indicatorColor = WarmPillBg,
+                            unselectedIconColor = BrownIconBorder,
+                            unselectedTextColor = WarmBrownSecondary
                         ),
                         modifier = Modifier.testTag("tab_history")
+                    )
+
+                    // Settings Tab
+                    NavigationBarItem(
+                        selected = uiState.selectedTab == NavigationTab.SETTINGS,
+                        onClick = { viewModel.selectTab(NavigationTab.SETTINGS) },
+                        icon = {
+                            Icon(
+                                imageVector = if (uiState.selectedTab == NavigationTab.SETTINGS) Icons.Filled.Settings else Icons.Outlined.Settings,
+                                contentDescription = "Settings"
+                            )
+                        },
+                        label = {
+                            Text(
+                                text = "Settings",
+                                fontWeight = if (uiState.selectedTab == NavigationTab.SETTINGS) FontWeight.Bold else FontWeight.Medium
+                            )
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = DarkChocolateHeadings,
+                            selectedTextColor = DarkChocolateHeadings,
+                            indicatorColor = WarmPillBg,
+                            unselectedIconColor = BrownIconBorder,
+                            unselectedTextColor = WarmBrownSecondary
+                        ),
+                        modifier = Modifier.testTag("tab_settings")
                     )
                 }
             }
@@ -263,7 +295,7 @@ fun WorkPilotMainApp(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(WarmIvoryBg)
                 .padding(innerPadding)
         ) {
             when (uiState.selectedTab) {
@@ -302,6 +334,19 @@ fun WorkPilotMainApp(
                         userSettings = uiState.userSettings,
                         allPlans = uiState.allPlans,
                         allSessions = uiState.allSessions,
+                        onToggleTaskCompleteForDate = { date, type -> viewModel.toggleTaskCompleteForDate(date, type) },
+                        onOpenBackupDialog = { viewModel.openBackupDialog() }
+                    )
+                }
+
+                NavigationTab.SETTINGS -> {
+                    SettingsScreen(
+                        userSettings = uiState.userSettings,
+                        onUpdateName = { newName -> viewModel.updateName(newName) },
+                        onUpdateWorkStartTime = { h, m -> viewModel.updateWorkStartTime(h, m) },
+                        onUpdateDailyTargetSessions = { target -> viewModel.updateDailyTargetSessions(target) },
+                        onUpdateDefaultFocusDuration = { dur -> viewModel.updateDefaultFocusDuration(dur) },
+                        onUpdateRewardPoints = { points -> viewModel.updateTotalRewardPoints(points) },
                         onOpenBackupDialog = { viewModel.openBackupDialog() }
                     )
                 }

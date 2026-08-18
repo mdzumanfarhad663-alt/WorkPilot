@@ -5,27 +5,27 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val WorkPilotColorScheme = lightColorScheme(
-    primary = PilotDarkGreen,
+private val WarmIvoryColorScheme = lightColorScheme(
+    primary = GoldenAmberPrimary,
     onPrimary = Color.White,
-    primaryContainer = PilotGreenContainer,
-    onPrimaryContainer = PilotOnGreenContainer,
-    secondary = PilotDarkGreen,
+    primaryContainer = WarmPillBg,
+    onPrimaryContainer = DarkChocolateHeadings,
+    secondary = GoldenAmberPrimary,
     onSecondary = Color.White,
-    secondaryContainer = Color(0xFFF1F5F9),
-    onSecondaryContainer = PilotTextPrimary,
-    background = PilotBackground,
-    onBackground = PilotTextBody,
-    surface = PilotSurface,
-    onSurface = PilotTextPrimary,
-    surfaceVariant = Color(0xFFF8FAFC),
-    onSurfaceVariant = PilotTextSecondary,
-    outline = PilotBorder,
-    outlineVariant = Color(0xFFF1F5F9),
-    error = PilotFailure,
+    secondaryContainer = WarmPillBg,
+    onSecondaryContainer = DarkChocolateHeadings,
+    background = WarmIvoryBg,
+    onBackground = WarmBrownBody,
+    surface = SoftCreamCard,
+    onSurface = DarkChocolateHeadings,
+    surfaceVariant = WarmIvoryBg,
+    onSurfaceVariant = WarmBrownSecondary,
+    outline = CardSubtleBorder,
+    outlineVariant = WarmPillBg,
+    error = WarmCrimsonFailure,
     onError = Color.White,
-    errorContainer = PilotFailureBg,
-    onErrorContainer = PilotFailure
+    errorContainer = WarmFailureBg,
+    onErrorContainer = WarmCrimsonFailure
 )
 
 @Composable
@@ -33,13 +33,12 @@ fun WorkPilotTheme(
     content: @Composable () -> Unit
 ) {
     MaterialTheme(
-        colorScheme = WorkPilotColorScheme,
+        colorScheme = WarmIvoryColorScheme,
         typography = Typography,
         content = content
     )
 }
 
-// Backwards compatibility alias
 @Composable
 fun FocusLockTheme(
     darkTheme: Boolean = false,

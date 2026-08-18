@@ -26,7 +26,8 @@ import kotlinx.coroutines.launch
 enum class NavigationTab(val label: String) {
     TODAY("Today"),
     FOCUS("Focus"),
-    HISTORY("History")
+    HISTORY("History"),
+    SETTINGS("Settings")
 }
 
 data class FocusLockUiState(
@@ -398,6 +399,67 @@ class FocusLockViewModel(application: Application) : AndroidViewModel(applicatio
 
     fun closeBackupDialog() {
         _dialogState.value = _dialogState.value.copy(showBackupDialog = false)
+    }
+
+    fun updateName(newName: String) {
+        viewModelScope.launch {
+            val current = repository.userSettings.value
+            val updated = current.copy(name = newName.trim())
+            repository.saveUserSettings(updated)
+            _messageToast.value = "Name updated"
+        }
+    }
+
+    fun updateWorkStartTime(hour: Int, minute: Int) {
+        viewModelScope.launch {
+            val current = repository.userSettings.value
+            val updated = current.copy(
+                normalWorkStartHour = hour.coerceIn(0, 23),
+                normalWorkStartMinute = minute.coerceIn(0, 59)
+            )
+            repository.saveUserSettings(updated)
+            _messageToast.value = "Work starting time set to ${updated.formattedWorkStartTime}"
+        }
+    }
+
+    fun updateDailyTargetSessions(target: Int) {
+        viewModelScope.launch {
+            val current = repository.userSettings.value
+            val cleanTarget = target.coerceIn(1, 10)
+            val updated = current.copy(dailyFocusTargetSessions = cleanTarget)
+            repository.saveUserSettings(updated)
+            _messageToast.value = "Daily target set to $cleanTarget sessions"
+        }
+    }
+
+    fun updateDefaultFocusDuration(durationMinutes: Int) {
+        viewModelScope.launch {
+            val current = repository.userSettings.value
+            val cleanDuration = durationMinutes.coerceIn(1, 300)
+            val updated = current.copy(defaultFocusDurationMinutes = cleanDuration)
+            repository.saveUserSettings(updated)
+            _messageToast.value = "Default session duration set to $cleanDuration min"
+        }
+    }
+
+    fun updateTotalRewardPoints(points: Int) {
+        viewModelScope.launch {
+            repository.setTotalRewardPoints(points)
+            _messageToast.value = "Reward points balance updated to $points pts"
+        }
+    }
+
+    fun toggleTaskCompleteForDate(date: String, taskType: TaskType) {
+        viewModelScope.launch {
+            val isNowDone = repository.toggleTaskCompleteForDate(date, taskType)
+            _messageToast.value = if (isNowDone) "+10 Reward Points! Task marked complete." else "-10 Reward Points"
+        }
+    }
+
+    fun updateTaskTitleForDate(date: String, taskType: TaskType, title: String) {
+        viewModelScope.launch {
+            repository.updateTaskForDate(date, taskType, title)
+        }
     }
 
     fun clearToast() {

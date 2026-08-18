@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -22,8 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -41,7 +40,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -49,11 +47,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import com.example.data.model.TaskType
-import com.example.ui.theme.PilotBorder
-import com.example.ui.theme.PilotDarkGreen
-import com.example.ui.theme.PilotGreenContainer
-import com.example.ui.theme.PilotTextPrimary
-import com.example.ui.theme.PilotTextSecondary
+import com.example.ui.components.GoldenGradientButton
+import com.example.ui.theme.BrownIconBorder
+import com.example.ui.theme.CardSubtleBorder
+import com.example.ui.theme.DarkChocolateHeadings
+import com.example.ui.theme.GoldenAmberPrimary
+import com.example.ui.theme.SoftCreamCard
+import com.example.ui.theme.WarmBrownBody
+import com.example.ui.theme.WarmBrownSecondary
+import com.example.ui.theme.WarmPillBg
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
@@ -74,9 +76,9 @@ fun CustomDurationDialog(
             modifier = Modifier
                 .widthIn(max = 440.dp)
                 .fillMaxWidth(0.95f),
-            shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surface,
-            border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
+            shape = RoundedCornerShape(18.dp),
+            color = SoftCreamCard,
+            border = androidx.compose.foundation.BorderStroke(1.dp, CardSubtleBorder),
             shadowElevation = 4.dp
         ) {
             Column(
@@ -87,18 +89,20 @@ fun CustomDurationDialog(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(PilotGreenContainer)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(WarmPillBg)
+                            .border(1.dp, CardSubtleBorder, RoundedCornerShape(10.dp))
                             .padding(8.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Timer,
                             contentDescription = "Timer",
-                            tint = PilotDarkGreen
+                            tint = BrownIconBorder,
+                            modifier = Modifier.size(22.dp)
                         )
                     }
                     Column {
@@ -106,13 +110,13 @@ fun CustomDurationDialog(
                             text = "Set Timer for ${taskType.displayName}",
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.Bold,
-                            color = PilotTextPrimary
+                            color = DarkChocolateHeadings
                         )
                         if (taskTitle.isNotBlank()) {
                             Text(
                                 text = taskTitle,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = PilotTextSecondary,
+                                color = WarmBrownSecondary,
                                 maxLines = 1
                             )
                         }
@@ -126,7 +130,7 @@ fun CustomDurationDialog(
                     text = "Custom Duration (Minutes)",
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = PilotTextPrimary
+                    color = DarkChocolateHeadings
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -142,9 +146,10 @@ fun CustomDurationDialog(
                             customText = newM.toString()
                         },
                         modifier = Modifier
-                            .border(1.dp, PilotBorder, RoundedCornerShape(8.dp))
+                            .border(1.dp, CardSubtleBorder, RoundedCornerShape(10.dp))
+                            .background(WarmPillBg, RoundedCornerShape(10.dp))
                     ) {
-                        Icon(Icons.Default.Remove, contentDescription = "Minus 5m", tint = PilotTextPrimary)
+                        Icon(Icons.Default.Remove, contentDescription = "Minus 5m", tint = BrownIconBorder)
                     }
 
                     OutlinedTextField(
@@ -165,15 +170,15 @@ fun CustomDurationDialog(
                         textStyle = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             fontSize = 20.sp,
-                            color = PilotDarkGreen
+                            color = DarkChocolateHeadings
                         ),
-                        suffix = { Text("min", fontWeight = FontWeight.SemiBold, color = PilotTextSecondary) },
+                        suffix = { Text("min", fontWeight = FontWeight.SemiBold, color = WarmBrownSecondary) },
                         shape = RoundedCornerShape(10.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = PilotDarkGreen,
-                            unfocusedBorderColor = PilotBorder,
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                            focusedBorderColor = GoldenAmberPrimary,
+                            unfocusedBorderColor = CardSubtleBorder,
+                            focusedContainerColor = SoftCreamCard,
+                            unfocusedContainerColor = SoftCreamCard
                         )
                     )
 
@@ -184,9 +189,10 @@ fun CustomDurationDialog(
                             customText = newM.toString()
                         },
                         modifier = Modifier
-                            .border(1.dp, PilotBorder, RoundedCornerShape(8.dp))
+                            .border(1.dp, CardSubtleBorder, RoundedCornerShape(10.dp))
+                            .background(WarmPillBg, RoundedCornerShape(10.dp))
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Plus 5m", tint = PilotTextPrimary)
+                        Icon(Icons.Default.Add, contentDescription = "Plus 5m", tint = BrownIconBorder)
                     }
                 }
 
@@ -197,7 +203,7 @@ fun CustomDurationDialog(
                     text = "Quick Presets",
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.SemiBold,
-                    color = PilotTextPrimary
+                    color = DarkChocolateHeadings
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -213,10 +219,10 @@ fun CustomDurationDialog(
                                 .clip(RoundedCornerShape(8.dp))
                                 .border(
                                     1.dp,
-                                    if (isSelected) PilotDarkGreen else PilotBorder,
+                                    if (isSelected) GoldenAmberPrimary else CardSubtleBorder,
                                     RoundedCornerShape(8.dp)
                                 )
-                                .background(if (isSelected) PilotGreenContainer else Color.Transparent)
+                                .background(if (isSelected) WarmPillBg else SoftCreamCard)
                                 .clickable {
                                     selectedMinutes = dur
                                     customText = dur.toString()
@@ -227,7 +233,7 @@ fun CustomDurationDialog(
                                 text = "$dur m",
                                 style = MaterialTheme.typography.labelMedium,
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                color = if (isSelected) PilotDarkGreen else PilotTextPrimary
+                                color = if (isSelected) DarkChocolateHeadings else WarmBrownBody
                             )
                         }
                     }
@@ -243,30 +249,24 @@ fun CustomDurationDialog(
                         onClick = onDismiss,
                         modifier = Modifier
                             .weight(1f)
-                            .height(46.dp),
+                            .height(48.dp),
                         shape = RoundedCornerShape(10.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder)
+                        border = androidx.compose.foundation.BorderStroke(1.dp, CardSubtleBorder)
                     ) {
-                        Text("Cancel", color = PilotTextPrimary, fontWeight = FontWeight.SemiBold)
+                        Text("Cancel", color = WarmBrownBody, fontWeight = FontWeight.SemiBold)
                     }
 
-                    Button(
+                    GoldenGradientButton(
+                        text = "Set $selectedMinutes Min",
                         onClick = {
                             val finalMinutes = selectedMinutes.coerceIn(1, 300)
                             onConfirmDuration(finalMinutes)
                         },
+                        height = 48.dp,
                         modifier = Modifier
                             .weight(1.5f)
-                            .height(46.dp)
-                            .testTag("apply_duration_button"),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = PilotDarkGreen,
-                            contentColor = Color.White
-                        )
-                    ) {
-                        Text("Set $selectedMinutes Min", fontWeight = FontWeight.Bold)
-                    }
+                            .testTag("apply_duration_button")
+                    )
                 }
             }
         }

@@ -24,8 +24,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Icon
@@ -53,21 +51,29 @@ import com.example.data.local.DailyPlanEntity
 import com.example.data.model.DailyScoreResult
 import com.example.data.model.TaskType
 import com.example.data.model.UserSettings
+import com.example.ui.components.GoldenGradientButton
 import com.example.ui.components.RewardPointsBadge
 import com.example.ui.components.ScoreBadge
 import com.example.ui.components.TaskDurationChip
 import com.example.ui.components.TaskNumberBadge
 import com.example.ui.dialogs.CustomDurationDialog
-import com.example.ui.theme.PilotBorder
-import com.example.ui.theme.PilotDarkGreen
-import com.example.ui.theme.PilotFailure
-import com.example.ui.theme.PilotGreenContainer
-import com.example.ui.theme.PilotSuccess
-import com.example.ui.theme.PilotTextMuted
-import com.example.ui.theme.PilotTextPrimary
-import com.example.ui.theme.PilotTextSecondary
-import com.example.ui.theme.PilotWarning
-import com.example.ui.theme.PilotWarningBg
+import com.example.ui.theme.BrownIconBorder
+import com.example.ui.theme.CardSubtleBorder
+import com.example.ui.theme.DarkChocolateHeadings
+import com.example.ui.theme.GoldenAmberPrimary
+import com.example.ui.theme.ProgressFillDeepAmber
+import com.example.ui.theme.ProgressTrackPaleGold
+import com.example.ui.theme.SoftCreamCard
+import com.example.ui.theme.WarmAmberWarning
+import com.example.ui.theme.WarmBrownBody
+import com.example.ui.theme.WarmBrownMuted
+import com.example.ui.theme.WarmBrownSecondary
+import com.example.ui.theme.WarmCrimsonFailure
+import com.example.ui.theme.WarmIvoryBg
+import com.example.ui.theme.WarmOliveSuccess
+import com.example.ui.theme.WarmPillBg
+import com.example.ui.theme.WarmSuccessBg
+import com.example.ui.theme.WarmWarningBg
 import com.example.util.DateUtil
 import com.example.util.SpecificityCoach
 
@@ -94,7 +100,7 @@ fun TodayScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(WarmIvoryBg)
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -113,9 +119,9 @@ fun TodayScreen(
                     modifier = Modifier
                         .widthIn(max = 720.dp)
                         .fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
+                    shape = RoundedCornerShape(18.dp),
+                    color = SoftCreamCard,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, CardSubtleBorder),
                     shadowElevation = 1.dp
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
@@ -129,12 +135,12 @@ fun TodayScreen(
                                     text = greeting,
                                     style = MaterialTheme.typography.headlineMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = PilotTextPrimary
+                                    color = DarkChocolateHeadings
                                 )
                                 Text(
                                     text = "$todayDisplayDate • Plan. Focus. Finish.",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = PilotTextSecondary
+                                    color = WarmBrownSecondary
                                 )
                             }
 
@@ -153,14 +159,15 @@ fun TodayScreen(
                                 Box(
                                     modifier = Modifier
                                         .clip(RoundedCornerShape(20.dp))
-                                        .background(PilotGreenContainer)
+                                        .background(WarmPillBg)
+                                        .border(1.dp, CardSubtleBorder, RoundedCornerShape(20.dp))
                                         .padding(horizontal = 10.dp, vertical = 6.dp)
                                 ) {
                                     Text(
                                         text = "🔥 ${userSettings.currentStreak}d",
                                         style = MaterialTheme.typography.labelMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = PilotSuccess
+                                        color = GoldenAmberPrimary
                                     )
                                 }
                             }
@@ -177,45 +184,71 @@ fun TodayScreen(
                             Text(
                                 text = "$completedCount of 3 tasks completed",
                                 style = MaterialTheme.typography.bodyMedium,
-                                fontWeight = FontWeight.SemiBold,
-                                color = PilotDarkGreen
+                                fontWeight = FontWeight.Bold,
+                                color = DarkChocolateHeadings,
+                                modifier = Modifier.weight(1f, fill = false)
                             )
-                            Text(
-                                text = "${completedSessionsCount}/${userSettings.dailyFocusTargetSessions} focus sessions",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = PilotTextSecondary
-                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(WarmPillBg)
+                                    .border(1.dp, CardSubtleBorder, RoundedCornerShape(12.dp))
+                                    .padding(horizontal = 8.dp, vertical = 3.dp)
+                            ) {
+                                Text(
+                                    text = "$completedSessionsCount/${userSettings.dailyFocusTargetSessions} sessions",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Medium,
+                                    color = WarmBrownSecondary
+                                )
+                            }
                         }
 
                         Spacer(modifier = Modifier.height(8.dp))
+                        // Progress bar: pale gold #F4D66D over deep amber #A96B00
                         LinearProgressIndicator(
                             progress = { (completedCount / 3f).coerceIn(0f, 1f) },
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(6.dp)
-                                .clip(RoundedCornerShape(3.dp)),
-                            color = PilotDarkGreen,
-                            trackColor = PilotBorder
+                                .height(8.dp)
+                                .clip(RoundedCornerShape(4.dp)),
+                            color = ProgressFillDeepAmber,
+                            trackColor = ProgressTrackPaleGold
                         )
 
                         Spacer(modifier = Modifier.height(10.dp))
+                        val livePoints = plan.livePointsDelta
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = "Reward rule: +10 pts per task completed • -10 pts per task missed",
+                                text = "Rule: +10 pts done • -10 pts missed",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = PilotTextSecondary
+                                color = WarmBrownSecondary,
+                                modifier = Modifier.weight(1f, fill = false)
                             )
-                            val livePoints = plan.livePointsDelta
-                            Text(
-                                text = if (livePoints >= 0) "Today: +$livePoints pts" else "Today: $livePoints pts",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = if (livePoints >= 0) PilotSuccess else PilotFailure
-                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(if (livePoints >= 0) WarmPillBg else Color(0xFFFDE8E8))
+                                    .border(
+                                        1.dp,
+                                        if (livePoints >= 0) CardSubtleBorder else WarmCrimsonFailure.copy(alpha = 0.3f),
+                                        RoundedCornerShape(8.dp)
+                                    )
+                                    .padding(horizontal = 8.dp, vertical = 3.dp)
+                            ) {
+                                Text(
+                                    text = if (livePoints >= 0) "Today: +$livePoints pts" else "Today: $livePoints pts",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = if (livePoints >= 0) WarmOliveSuccess else WarmCrimsonFailure
+                                )
+                            }
                         }
                     }
                 }
@@ -232,12 +265,12 @@ fun TodayScreen(
                         text = "Today's Priorities",
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
-                        color = PilotTextPrimary
+                        color = DarkChocolateHeadings
                     )
                     Text(
                         text = "Set custom timer durations for each task. Complete tasks to earn +10 reward points.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = PilotTextSecondary
+                        color = WarmBrownSecondary
                     )
                 }
             }
@@ -293,9 +326,9 @@ fun TodayScreen(
                     modifier = Modifier
                         .widthIn(max = 720.dp)
                         .fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    color = MaterialTheme.colorScheme.surface,
-                    border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
+                    shape = RoundedCornerShape(18.dp),
+                    color = SoftCreamCard,
+                    border = androidx.compose.foundation.BorderStroke(1.dp, CardSubtleBorder),
                     shadowElevation = 1.dp
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
@@ -309,12 +342,12 @@ fun TodayScreen(
                                     text = "Daily Discipline Score",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = PilotTextPrimary
+                                    color = DarkChocolateHeadings
                                 )
                                 Text(
                                     text = "Score 4+ to maintain discipline streak",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = PilotTextSecondary
+                                    color = WarmBrownSecondary
                                 )
                             }
                             ScoreBadge(
@@ -334,32 +367,20 @@ fun TodayScreen(
                 }
             }
 
-            // 4. Finish Workday CTA
+            // 4. Finish Workday CTA (Golden Orange Gradient Button)
             item {
                 Box(
                     modifier = Modifier
                         .widthIn(max = 720.dp)
                         .fillMaxWidth()
                 ) {
-                    Button(
+                    GoldenGradientButton(
+                        text = "Finish My Workday",
                         onClick = onFinishWorkday,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                            .testTag("finish_workday_button"),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = PilotDarkGreen,
-                            contentColor = Color.White
-                        )
-                    ) {
-                        Text(
-                            text = "Finish My Workday",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                        height = 52.dp,
+                        fontSize = 15.sp,
+                        modifier = Modifier.testTag("finish_workday_button")
+                    )
                 }
             }
         }
@@ -399,11 +420,11 @@ fun TaskSlotCard(
 
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surface,
+        shape = RoundedCornerShape(16.dp),
+        color = SoftCreamCard,
         border = androidx.compose.foundation.BorderStroke(
             1.dp,
-            if (isCompleted) Color(0xFFBBF7D0) else PilotBorder
+            if (isCompleted) WarmOliveSuccess.copy(alpha = 0.35f) else CardSubtleBorder
         ),
         shadowElevation = 1.dp
     ) {
@@ -433,16 +454,16 @@ fun TaskSlotCard(
                         text = if (isCompleted) "+10 pts" else "Mark Done (+10)",
                         style = MaterialTheme.typography.labelSmall,
                         fontWeight = FontWeight.SemiBold,
-                        color = if (isCompleted) PilotSuccess else PilotTextSecondary
+                        color = if (isCompleted) WarmOliveSuccess else WarmBrownSecondary
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Checkbox(
                         checked = isCompleted,
                         onCheckedChange = { onToggleComplete() },
                         colors = CheckboxDefaults.colors(
-                            checkedColor = PilotDarkGreen,
+                            checkedColor = GoldenAmberPrimary,
                             checkmarkColor = Color.White,
-                            uncheckedColor = PilotBorder
+                            uncheckedColor = BrownIconBorder
                         ),
                         modifier = Modifier.testTag("checkbox_${taskType.name.lowercase()}")
                     )
@@ -461,7 +482,7 @@ fun TaskSlotCard(
                 placeholder = {
                     Text(
                         text = taskType.placeholder,
-                        color = PilotTextMuted,
+                        color = WarmBrownMuted,
                         style = MaterialTheme.typography.bodyMedium
                     )
                 },
@@ -472,14 +493,14 @@ fun TaskSlotCard(
                 textStyle = MaterialTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.Medium,
                     textDecoration = if (isCompleted) TextDecoration.LineThrough else TextDecoration.None,
-                    color = if (isCompleted) PilotTextMuted else PilotTextPrimary
+                    color = if (isCompleted) WarmBrownMuted else DarkChocolateHeadings
                 ),
                 shape = RoundedCornerShape(10.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = PilotDarkGreen,
-                    unfocusedBorderColor = PilotBorder,
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                    focusedBorderColor = GoldenAmberPrimary,
+                    unfocusedBorderColor = CardSubtleBorder,
+                    focusedContainerColor = SoftCreamCard,
+                    unfocusedContainerColor = SoftCreamCard
                 )
             )
 
@@ -489,22 +510,23 @@ fun TaskSlotCard(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(PilotWarningBg)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(WarmWarningBg)
+                            .border(1.dp, CardSubtleBorder, RoundedCornerShape(10.dp))
                             .padding(horizontal = 12.dp, vertical = 8.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(
                                 imageVector = Icons.Default.Info,
                                 contentDescription = "Specificity warning",
-                                tint = PilotWarning,
+                                tint = WarmAmberWarning,
                                 modifier = Modifier.size(16.dp)
                             )
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(
                                 text = SpecificityCoach.getSuggestion(textValue),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = PilotWarning,
+                                color = WarmAmberWarning,
                                 fontWeight = FontWeight.Medium
                             )
                         }
@@ -512,34 +534,17 @@ fun TaskSlotCard(
                 }
             }
 
-            // Prominent Start Focus button if incomplete
+            // Prominent Start Focus Golden Gradient Button if incomplete
             if (!isCompleted) {
                 Spacer(modifier = Modifier.height(14.dp))
-                Button(
+                GoldenGradientButton(
+                    text = "Start Focus (${durationMinutes} min)",
                     onClick = { onStartFocus(textValue) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(46.dp)
-                        .testTag("start_focus_${taskType.name.lowercase()}"),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = PilotDarkGreen,
-                        contentColor = Color.White
-                    ),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 1.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.PlayArrow,
-                        contentDescription = "Start Focus",
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Text(
-                        text = "Start Focus (${durationMinutes} min)",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
+                    height = 46.dp,
+                    fontSize = 14.sp,
+                    leadingIcon = Icons.Default.PlayArrow,
+                    modifier = Modifier.testTag("start_focus_${taskType.name.lowercase()}")
+                )
             }
         }
     }
@@ -562,19 +567,19 @@ private fun ScoreItemRow(label: String, earned: Boolean) {
                 modifier = Modifier
                     .size(18.dp)
                     .clip(CircleShape)
-                    .background(if (earned) PilotGreenContainer else Color.Transparent)
-                    .border(
-                        1.dp,
-                        if (earned) PilotSuccess else PilotBorder,
-                        CircleShape
-                    ),
+                .background(if (earned) WarmSuccessBg else Color.Transparent)
+                .border(
+                    1.dp,
+                    if (earned) WarmOliveSuccess else CardSubtleBorder,
+                    CircleShape
+                ),
                 contentAlignment = Alignment.Center
             ) {
                 if (earned) {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = "Earned point",
-                        tint = PilotSuccess,
+                        tint = WarmOliveSuccess,
                         modifier = Modifier.size(12.dp)
                     )
                 }
@@ -583,14 +588,14 @@ private fun ScoreItemRow(label: String, earned: Boolean) {
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodyMedium,
-                color = if (earned) PilotTextPrimary else PilotTextSecondary
+                color = if (earned) DarkChocolateHeadings else WarmBrownSecondary
             )
         }
         Text(
             text = if (earned) "+1" else "0",
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.Bold,
-            color = if (earned) PilotSuccess else PilotTextMuted
+            color = if (earned) WarmOliveSuccess else WarmBrownMuted
         )
     }
 }

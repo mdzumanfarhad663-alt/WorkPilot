@@ -3,6 +3,7 @@ package com.example.ui.screens.focus
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -51,20 +52,27 @@ import com.example.data.local.DailyPlanEntity
 import com.example.data.model.ActiveSessionState
 import com.example.data.model.TaskType
 import com.example.data.model.UserSettings
+import com.example.ui.components.GoldenGradientButton
 import com.example.ui.components.TaskDurationChip
 import com.example.ui.components.TaskNumberBadge
 import com.example.ui.dialogs.CustomDurationDialog
-import com.example.ui.theme.PilotBorder
-import com.example.ui.theme.PilotDarkGreen
-import com.example.ui.theme.PilotFailure
-import com.example.ui.theme.PilotFailureBg
-import com.example.ui.theme.PilotGreenContainer
-import com.example.ui.theme.PilotSuccess
-import com.example.ui.theme.PilotTextMuted
-import com.example.ui.theme.PilotTextPrimary
-import com.example.ui.theme.PilotTextSecondary
-import com.example.ui.theme.PilotWarning
-import com.example.ui.theme.PilotWarningBg
+import com.example.ui.theme.BrownIconBorder
+import com.example.ui.theme.CardSubtleBorder
+import com.example.ui.theme.DarkChocolateHeadings
+import com.example.ui.theme.GoldenAmberPrimary
+import com.example.ui.theme.ProgressFillDeepAmber
+import com.example.ui.theme.ProgressTrackPaleGold
+import com.example.ui.theme.SoftCreamCard
+import com.example.ui.theme.WarmAmberWarning
+import com.example.ui.theme.WarmBrownBody
+import com.example.ui.theme.WarmBrownMuted
+import com.example.ui.theme.WarmBrownSecondary
+import com.example.ui.theme.WarmCrimsonFailure
+import com.example.ui.theme.WarmFailureBg
+import com.example.ui.theme.WarmIvoryBg
+import com.example.ui.theme.WarmOliveSuccess
+import com.example.ui.theme.WarmPillBg
+import com.example.ui.theme.WarmWarningBg
 import com.example.util.DateUtil
 
 @Composable
@@ -85,7 +93,7 @@ fun FocusScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(WarmIvoryBg),
         horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(
             start = 16.dp,
@@ -139,9 +147,9 @@ private fun ActiveFocusView(
         modifier = Modifier
             .widthIn(max = 560.dp)
             .fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface,
-        border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
+        shape = RoundedCornerShape(18.dp),
+        color = SoftCreamCard,
+        border = androidx.compose.foundation.BorderStroke(1.dp, CardSubtleBorder),
         shadowElevation = 1.dp
     ) {
         Column(
@@ -157,27 +165,28 @@ private fun ActiveFocusView(
                 text = session.taskTitle,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = PilotTextPrimary,
+                color = DarkChocolateHeadings,
                 textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
             // Circular Progress & Remaining Time Ring
+            // Pale gold track #F4D66D over deep amber #A96B00
             Box(
                 modifier = Modifier.size(220.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val strokeWidth = 14.dp.toPx()
-                    // Background track
+                    // Background track (Pale Gold #F4D66D)
                     drawCircle(
-                        color = Color(0xFFE2E8F0),
+                        color = ProgressTrackPaleGold,
                         style = Stroke(width = strokeWidth)
                     )
-                    // Progress arc
+                    // Progress arc (Deep Amber #A96B00 / Golden Orange)
                     drawArc(
-                        color = if (session.isPaused) Color(0xFFF59E0B) else PilotDarkGreen,
+                        color = if (session.isPaused) WarmAmberWarning else ProgressFillDeepAmber,
                         startAngle = -90f,
                         sweepAngle = progress * 360f,
                         useCenter = false,
@@ -191,13 +200,13 @@ private fun ActiveFocusView(
                         style = MaterialTheme.typography.headlineLarge,
                         fontSize = 42.sp,
                         fontWeight = FontWeight.Bold,
-                        color = PilotTextPrimary
+                        color = DarkChocolateHeadings
                     )
                     Text(
                         text = if (session.isPaused) "PAUSED: ${session.pauseReason ?: ""}" else "${session.durationMinutes} MIN SESSION",
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = if (session.isPaused) PilotWarning else PilotTextSecondary
+                        color = if (session.isPaused) WarmAmberWarning else WarmBrownSecondary
                     )
                 }
             }
@@ -209,14 +218,15 @@ private fun ActiveFocusView(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(PilotWarningBg)
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(WarmWarningBg)
+                        .border(1.dp, CardSubtleBorder, RoundedCornerShape(10.dp))
                         .padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {
                     Text(
                         text = "Discipline Rule: Complete at least 80% ($eightyPercentMin min) before marking session finished.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = PilotWarning,
+                        color = WarmAmberWarning,
                         fontWeight = FontWeight.Medium,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
@@ -233,22 +243,15 @@ private fun ActiveFocusView(
             ) {
                 // Pause / Resume
                 if (session.isPaused) {
-                    Button(
+                    GoldenGradientButton(
+                        text = "Resume",
                         onClick = onResumeClick,
+                        height = 48.dp,
+                        leadingIcon = Icons.Default.PlayArrow,
                         modifier = Modifier
                             .weight(1f)
-                            .height(48.dp)
-                            .testTag("resume_session_button"),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = PilotDarkGreen,
-                            contentColor = Color.White
-                        )
-                    ) {
-                        Icon(Icons.Default.PlayArrow, contentDescription = "Resume")
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Resume", fontWeight = FontWeight.SemiBold)
-                    }
+                            .testTag("resume_session_button")
+                    )
                 } else {
                     OutlinedButton(
                         onClick = onPauseClick,
@@ -257,11 +260,11 @@ private fun ActiveFocusView(
                             .height(48.dp)
                             .testTag("pause_session_button"),
                         shape = RoundedCornerShape(10.dp),
-                        border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder)
+                        border = androidx.compose.foundation.BorderStroke(1.dp, CardSubtleBorder)
                     ) {
-                        Icon(Icons.Default.Pause, contentDescription = "Pause", tint = PilotTextPrimary)
+                        Icon(Icons.Default.Pause, contentDescription = "Pause", tint = BrownIconBorder)
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Pause", color = PilotTextPrimary, fontWeight = FontWeight.SemiBold)
+                        Text("Pause", color = WarmBrownBody, fontWeight = FontWeight.SemiBold)
                     }
                 }
 
@@ -273,41 +276,28 @@ private fun ActiveFocusView(
                         .height(48.dp)
                         .testTag("give_up_session_button"),
                     shape = RoundedCornerShape(10.dp),
-                    border = androidx.compose.foundation.BorderStroke(1.dp, PilotFailureBg),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, CardSubtleBorder),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = PilotFailure
+                        contentColor = WarmCrimsonFailure
                     )
                 ) {
-                    Icon(Icons.Default.Close, contentDescription = "Give Up", tint = PilotFailure)
+                    Icon(Icons.Default.Close, contentDescription = "Give Up", tint = WarmCrimsonFailure)
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Give Up", color = PilotFailure, fontWeight = FontWeight.SemiBold)
+                    Text("Give Up", color = WarmCrimsonFailure, fontWeight = FontWeight.SemiBold)
                 }
             }
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Finish Session Button (Active when >= 80% elapsed)
-            Button(
+            // Finish Session Button (Golden gradient when active)
+            val canFinish = isEligibleToFinishEarly || remainingMillis <= 0
+            GoldenGradientButton(
+                text = if (canFinish) "Finish Session" else "Finish Session (Locked until 80%)",
                 onClick = onFinishSessionClick,
-                enabled = isEligibleToFinishEarly || remainingMillis <= 0,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .testTag("finish_session_button"),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = PilotDarkGreen,
-                    contentColor = Color.White,
-                    disabledContainerColor = Color(0xFFE2E8F0),
-                    disabledContentColor = PilotTextMuted
-                )
-            ) {
-                Text(
-                    text = if (isEligibleToFinishEarly || remainingMillis <= 0) "Finish Session" else "Finish Session (Locked until 80%)",
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+                enabled = canFinish,
+                height = 50.dp,
+                modifier = Modifier.testTag("finish_session_button")
+            )
         }
     }
 }
@@ -331,9 +321,9 @@ private fun IdleFocusLauncherView(
         modifier = Modifier
             .widthIn(max = 560.dp)
             .fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surface,
-        border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
+        shape = RoundedCornerShape(18.dp),
+        color = SoftCreamCard,
+        border = androidx.compose.foundation.BorderStroke(1.dp, CardSubtleBorder),
         shadowElevation = 1.dp
     ) {
         Column(
@@ -346,13 +336,14 @@ private fun IdleFocusLauncherView(
                 modifier = Modifier
                     .size(56.dp)
                     .clip(CircleShape)
-                    .background(PilotGreenContainer),
+                    .background(WarmPillBg)
+                    .border(1.dp, CardSubtleBorder, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Lock,
                     contentDescription = "Focus",
-                    tint = PilotDarkGreen,
+                    tint = BrownIconBorder,
                     modifier = Modifier.size(28.dp)
                 )
             }
@@ -363,12 +354,12 @@ private fun IdleFocusLauncherView(
                 text = "Launch Focus Session",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = PilotTextPrimary
+                color = DarkChocolateHeadings
             )
             Text(
                 text = "Each task has its own customizable timer. Pick any duration (e.g. 5, 20, 35 min) and focus.",
                 style = MaterialTheme.typography.bodySmall,
-                color = PilotTextSecondary,
+                color = WarmBrownSecondary,
                 textAlign = TextAlign.Center
             )
 
@@ -378,7 +369,7 @@ private fun IdleFocusLauncherView(
                 text = "Select Task & Timer",
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = PilotTextPrimary,
+                color = DarkChocolateHeadings,
                 modifier = Modifier.align(Alignment.Start)
             )
             Spacer(modifier = Modifier.height(10.dp))
@@ -395,11 +386,11 @@ private fun IdleFocusLauncherView(
                         modifier = Modifier
                             .fillMaxWidth()
                             .testTag("select_focus_${type.name.lowercase()}"),
-                        shape = RoundedCornerShape(12.dp),
-                        color = if (isDone) Color(0xFFF8FAFC) else MaterialTheme.colorScheme.surface,
+                        shape = RoundedCornerShape(14.dp),
+                        color = if (isDone) WarmPillBg.copy(alpha = 0.5f) else SoftCreamCard,
                         border = androidx.compose.foundation.BorderStroke(
                             1.dp,
-                            if (isDone) Color(0xFFBBF7D0) else PilotBorder
+                            if (isDone) WarmOliveSuccess.copy(alpha = 0.35f) else CardSubtleBorder
                         )
                     ) {
                         Column(
@@ -427,7 +418,7 @@ private fun IdleFocusLauncherView(
                                     Text(
                                         text = "✓ Completed (+10 pts)",
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = PilotSuccess,
+                                        color = WarmOliveSuccess,
                                         fontWeight = FontWeight.SemiBold
                                     )
                                 }
@@ -439,31 +430,18 @@ private fun IdleFocusLauncherView(
                                 text = title,
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.SemiBold,
-                                color = if (isDone) PilotTextMuted else PilotTextPrimary
+                                color = if (isDone) WarmBrownMuted else DarkChocolateHeadings
                             )
 
                             Spacer(modifier = Modifier.height(10.dp))
 
-                            Button(
+                            GoldenGradientButton(
+                                text = "Start Focus ($duration min)",
                                 onClick = { onStartSession(type, title, duration) },
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = RoundedCornerShape(8.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = PilotDarkGreen,
-                                    contentColor = Color.White
-                                )
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.PlayArrow,
-                                    contentDescription = "Start",
-                                    modifier = Modifier.size(16.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = "Start Focus ($duration min)",
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
+                                height = 44.dp,
+                                leadingIcon = Icons.Default.PlayArrow,
+                                fontSize = 14.sp
+                            )
                         }
                     }
                 }

@@ -18,8 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -40,12 +38,17 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.theme.PilotBorder
-import com.example.ui.theme.PilotDarkGreen
-import com.example.ui.theme.PilotGreenContainer
-import com.example.ui.theme.PilotTextMuted
-import com.example.ui.theme.PilotTextPrimary
-import com.example.ui.theme.PilotTextSecondary
+import com.example.ui.components.GoldenGradientButton
+import com.example.ui.theme.BrownIconBorder
+import com.example.ui.theme.CardSubtleBorder
+import com.example.ui.theme.DarkChocolateHeadings
+import com.example.ui.theme.GoldenAmberPrimary
+import com.example.ui.theme.SoftCreamCard
+import com.example.ui.theme.WarmBrownBody
+import com.example.ui.theme.WarmBrownMuted
+import com.example.ui.theme.WarmBrownSecondary
+import com.example.ui.theme.WarmIvoryBg
+import com.example.ui.theme.WarmPillBg
 
 @Composable
 fun FirstTimeSetupScreen(
@@ -69,7 +72,7 @@ fun FirstTimeSetupScreen(
     LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
+            .background(WarmIvoryBg),
         horizontalAlignment = Alignment.CenterHorizontally,
         contentPadding = PaddingValues(
             start = 16.dp,
@@ -84,9 +87,9 @@ fun FirstTimeSetupScreen(
                 modifier = Modifier
                     .widthIn(max = 560.dp)
                     .fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surface,
-                border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
+                shape = RoundedCornerShape(18.dp),
+                color = SoftCreamCard,
+                border = androidx.compose.foundation.BorderStroke(1.dp, CardSubtleBorder),
                 shadowElevation = 1.dp
             ) {
                 Column(
@@ -102,26 +105,27 @@ fun FirstTimeSetupScreen(
                         Box(
                             modifier = Modifier
                                 .clip(RoundedCornerShape(10.dp))
-                                .background(PilotGreenContainer)
+                                .background(WarmPillBg)
+                                .border(1.dp, CardSubtleBorder, RoundedCornerShape(10.dp))
                                 .padding(10.dp)
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Lock,
                                 contentDescription = "WorkPilot",
-                                tint = PilotDarkGreen
+                                tint = BrownIconBorder
                             )
                         }
                         Column {
                             Text(
                                 text = "Welcome to WorkPilot",
                                 style = MaterialTheme.typography.headlineSmall,
-                                color = PilotTextPrimary,
+                                color = DarkChocolateHeadings,
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
                                 text = "Plan. Focus. Finish.",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = PilotTextSecondary,
+                                color = WarmBrownSecondary,
                                 fontWeight = FontWeight.Medium
                             )
                         }
@@ -133,24 +137,24 @@ fun FirstTimeSetupScreen(
                     Text(
                         text = "1. What is your name?",
                         style = MaterialTheme.typography.titleMedium,
-                        color = PilotTextPrimary,
+                        color = DarkChocolateHeadings,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     OutlinedTextField(
                         value = name,
                         onValueChange = { name = it },
-                        placeholder = { Text("Your name (e.g. Alex)", color = PilotTextMuted) },
+                        placeholder = { Text("Your name (e.g. Alex)", color = WarmBrownMuted) },
                         singleLine = true,
                         modifier = Modifier
                             .fillMaxWidth()
                             .testTag("setup_name_input"),
                         shape = RoundedCornerShape(10.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = PilotDarkGreen,
-                            unfocusedBorderColor = PilotBorder,
-                            focusedContainerColor = MaterialTheme.colorScheme.surface,
-                            unfocusedContainerColor = MaterialTheme.colorScheme.surface
+                            focusedBorderColor = GoldenAmberPrimary,
+                            unfocusedBorderColor = CardSubtleBorder,
+                            focusedContainerColor = SoftCreamCard,
+                            unfocusedContainerColor = SoftCreamCard
                         )
                     )
 
@@ -160,13 +164,13 @@ fun FirstTimeSetupScreen(
                     Text(
                         text = "2. Normal work starting time",
                         style = MaterialTheme.typography.titleMedium,
-                        color = PilotTextPrimary,
+                        color = DarkChocolateHeadings,
                         fontWeight = FontWeight.Bold
                     )
                     Text(
                         text = "You get full discipline credit if you begin within 30 minutes of this time.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = PilotTextSecondary
+                        color = WarmBrownSecondary
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Row(
@@ -193,7 +197,7 @@ fun FirstTimeSetupScreen(
                     Text(
                         text = "3. Daily focus target (sessions)",
                         style = MaterialTheme.typography.titleMedium,
-                        color = PilotTextPrimary,
+                        color = DarkChocolateHeadings,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(10.dp))
@@ -218,7 +222,7 @@ fun FirstTimeSetupScreen(
                     Text(
                         text = "4. Default focus session duration",
                         style = MaterialTheme.typography.titleMedium,
-                        color = PilotTextPrimary,
+                        color = DarkChocolateHeadings,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(10.dp))
@@ -239,29 +243,17 @@ fun FirstTimeSetupScreen(
 
                     Spacer(modifier = Modifier.height(28.dp))
 
-                    // Start button
-                    Button(
+                    // Start button (Golden Orange Gradient)
+                    GoldenGradientButton(
+                        text = "Begin Workday",
                         onClick = {
                             val finalName = if (name.isBlank()) "Freelancer" else name.trim()
                             onCompleteSetup(finalName, selectedHour, selectedMinute, dailyTarget, focusDuration)
                         },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(52.dp)
-                            .testTag("complete_setup_button"),
-                        shape = RoundedCornerShape(12.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = PilotDarkGreen,
-                            contentColor = Color.White
-                        )
-                    ) {
-                        Text(
-                            text = "Begin Workday",
-                            style = MaterialTheme.typography.labelLarge,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
+                        height = 52.dp,
+                        fontSize = 15.sp,
+                        modifier = Modifier.testTag("complete_setup_button")
+                    )
                 }
             }
         }
@@ -277,13 +269,13 @@ fun SelectionChip(
 ) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(10.dp))
             .border(
-                width = if (isSelected) 1.5.dp else 1.dp,
-                color = if (isSelected) PilotDarkGreen else PilotBorder,
-                shape = RoundedCornerShape(8.dp)
+                width = 1.dp,
+                color = if (isSelected) GoldenAmberPrimary else CardSubtleBorder,
+                shape = RoundedCornerShape(10.dp)
             )
-            .background(if (isSelected) PilotGreenContainer else Color.Transparent)
+            .background(if (isSelected) WarmPillBg else SoftCreamCard)
             .clickable(onClick = onClick)
             .padding(vertical = 10.dp, horizontal = 4.dp),
         contentAlignment = Alignment.Center
@@ -292,7 +284,7 @@ fun SelectionChip(
             text = text,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            color = if (isSelected) PilotDarkGreen else PilotTextPrimary
+            color = if (isSelected) DarkChocolateHeadings else WarmBrownBody
         )
     }
 }
