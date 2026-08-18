@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -52,13 +53,16 @@ import com.example.data.local.DailyPlanEntity
 import com.example.data.model.DailyScoreResult
 import com.example.data.model.TaskType
 import com.example.data.model.UserSettings
+import com.example.ui.components.RewardPointsBadge
 import com.example.ui.components.ScoreBadge
-import com.example.ui.components.TaskCategoryBadge
+import com.example.ui.components.TaskDurationChip
+import com.example.ui.components.TaskNumberBadge
+import com.example.ui.dialogs.CustomDurationDialog
 import com.example.ui.theme.PilotBorder
 import com.example.ui.theme.PilotDarkGreen
+import com.example.ui.theme.PilotFailure
 import com.example.ui.theme.PilotGreenContainer
 import com.example.ui.theme.PilotSuccess
-import com.example.ui.theme.PilotTextBody
 import com.example.ui.theme.PilotTextMuted
 import com.example.ui.theme.PilotTextPrimary
 import com.example.ui.theme.PilotTextSecondary
@@ -74,8 +78,9 @@ fun TodayScreen(
     liveScore: DailyScoreResult,
     completedSessionsCount: Int,
     onUpdateTask: (TaskType, String) -> Unit,
+    onUpdateTaskDuration: (TaskType, Int) -> Unit,
     onToggleTaskComplete: (TaskType) -> Unit,
-    onStartFocus: (TaskType, String) -> Unit,
+    onStartFocus: (TaskType, String, Int) -> Unit,
     onFinishWorkday: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -84,28 +89,30 @@ fun TodayScreen(
     val greeting = DateUtil.getGreeting(userSettings.name)
     val todayDisplayDate = DateUtil.formatToDisplay(DateUtil.getTodayDateString())
 
+    var durationDialogTaskType by remember { mutableStateOf<TaskType?>(null) }
+
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.TopCenter
+            .background(MaterialTheme.colorScheme.background)
     ) {
         LazyColumn(
-            modifier = Modifier
-                .widthIn(max = 720.dp)
-                .fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = PaddingValues(
                 start = 16.dp,
                 end = 16.dp,
                 top = 16.dp,
-                bottom = 48.dp
+                bottom = 80.dp
             ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // 1. Top Header Card
             item {
                 Surface(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .widthIn(max = 720.dp)
+                        .fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.surface,
                     border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
@@ -131,19 +138,31 @@ fun TodayScreen(
                                 )
                             }
 
-                            // Streak Pill
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(20.dp))
-                                    .background(PilotGreenContainer)
-                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    text = "🔥 ${userSettings.currentStreak} day streak",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = PilotSuccess
+                                // Reward Points Badge
+                                RewardPointsBadge(
+                                    points = userSettings.totalRewardPoints,
+                                    isLarge = true,
+                                    modifier = Modifier.testTag("reward_points_badge")
                                 )
+
+                                // Streak Pill
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(20.dp))
+                                        .background(PilotGreenContainer)
+                                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                                ) {
+                                    Text(
+                                        text = "🔥 ${userSettings.currentStreak}d",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = PilotSuccess
+                                    )
+                                }
                             }
                         }
 
@@ -178,65 +197,102 @@ fun TodayScreen(
                             color = PilotDarkGreen,
                             trackColor = PilotBorder
                         )
+
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Reward rule: +10 pts per task completed • -10 pts per task missed",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = PilotTextSecondary
+                            )
+                            val livePoints = plan.livePointsDelta
+                            Text(
+                                text = if (livePoints >= 0) "Today: +$livePoints pts" else "Today: $livePoints pts",
+                                style = MaterialTheme.typography.labelSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = if (livePoints >= 0) PilotSuccess else PilotFailure
+                            )
+                        }
                     }
                 }
             }
 
             // 2. Three Task Cards Header
             item {
-                Text(
-                    text = "Today's Three Priorities",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold,
-                    color = PilotTextPrimary
-                )
-                Text(
-                    text = "Commit to 3 essential tasks. Start focus mode and build momentum.",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = PilotTextSecondary
+                Column(
+                    modifier = Modifier
+                        .widthIn(max = 720.dp)
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Today's Priorities",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = PilotTextPrimary
+                    )
+                    Text(
+                        text = "Set custom timer durations for each task. Complete tasks to earn +10 reward points.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = PilotTextSecondary
+                    )
+                }
+            }
+
+            // Task 1 Card
+            item {
+                TaskSlotCard(
+                    taskType = TaskType.TASK_1,
+                    taskTitle = plan.task1Title,
+                    durationMinutes = plan.task1DurationMinutes,
+                    isCompleted = plan.task1Completed,
+                    onTitleChange = { onUpdateTask(TaskType.TASK_1, it) },
+                    onDurationClick = { durationDialogTaskType = TaskType.TASK_1 },
+                    onToggleComplete = { onToggleTaskComplete(TaskType.TASK_1) },
+                    onStartFocus = { title -> onStartFocus(TaskType.TASK_1, title, plan.task1DurationMinutes) },
+                    modifier = Modifier.widthIn(max = 720.dp)
                 )
             }
 
-            // Slot 1: Money Task
+            // Task 2 Card
             item {
                 TaskSlotCard(
-                    taskType = TaskType.MONEY,
-                    taskTitle = plan.moneyTaskTitle,
-                    isCompleted = plan.moneyTaskCompleted,
-                    onTitleChange = { onUpdateTask(TaskType.MONEY, it) },
-                    onToggleComplete = { onToggleTaskComplete(TaskType.MONEY) },
-                    onStartFocus = { title -> onStartFocus(TaskType.MONEY, title) }
+                    taskType = TaskType.TASK_2,
+                    taskTitle = plan.task2Title,
+                    durationMinutes = plan.task2DurationMinutes,
+                    isCompleted = plan.task2Completed,
+                    onTitleChange = { onUpdateTask(TaskType.TASK_2, it) },
+                    onDurationClick = { durationDialogTaskType = TaskType.TASK_2 },
+                    onToggleComplete = { onToggleTaskComplete(TaskType.TASK_2) },
+                    onStartFocus = { title -> onStartFocus(TaskType.TASK_2, title, plan.task2DurationMinutes) },
+                    modifier = Modifier.widthIn(max = 720.dp)
                 )
             }
 
-            // Slot 2: Growth Task
+            // Task 3 Card
             item {
                 TaskSlotCard(
-                    taskType = TaskType.GROWTH,
-                    taskTitle = plan.growthTaskTitle,
-                    isCompleted = plan.growthTaskCompleted,
-                    onTitleChange = { onUpdateTask(TaskType.GROWTH, it) },
-                    onToggleComplete = { onToggleTaskComplete(TaskType.GROWTH) },
-                    onStartFocus = { title -> onStartFocus(TaskType.GROWTH, title) }
-                )
-            }
-
-            // Slot 3: Maintenance Task
-            item {
-                TaskSlotCard(
-                    taskType = TaskType.MAINTENANCE,
-                    taskTitle = plan.maintenanceTaskTitle,
-                    isCompleted = plan.maintenanceTaskCompleted,
-                    onTitleChange = { onUpdateTask(TaskType.MAINTENANCE, it) },
-                    onToggleComplete = { onToggleTaskComplete(TaskType.MAINTENANCE) },
-                    onStartFocus = { title -> onStartFocus(TaskType.MAINTENANCE, title) }
+                    taskType = TaskType.TASK_3,
+                    taskTitle = plan.task3Title,
+                    durationMinutes = plan.task3DurationMinutes,
+                    isCompleted = plan.task3Completed,
+                    onTitleChange = { onUpdateTask(TaskType.TASK_3, it) },
+                    onDurationClick = { durationDialogTaskType = TaskType.TASK_3 },
+                    onToggleComplete = { onToggleTaskComplete(TaskType.TASK_3) },
+                    onStartFocus = { title -> onStartFocus(TaskType.TASK_3, title, plan.task3DurationMinutes) },
+                    modifier = Modifier.widthIn(max = 720.dp)
                 )
             }
 
             // 3. Live Daily Score Tracker
             item {
                 Surface(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .widthIn(max = 720.dp)
+                        .fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.surface,
                     border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
@@ -272,34 +328,56 @@ fun TodayScreen(
                         ScoreItemRow("1. Planned three specific tasks", liveScore.plannedThreeTasksPoint == 1)
                         ScoreItemRow("2. Started work within 30 min of ${userSettings.formattedWorkStartTime}", liveScore.startedOnTimePoint == 1)
                         ScoreItemRow("3. Completed daily target (${userSettings.dailyFocusTargetSessions} focus sessions)", liveScore.completedTargetSessionsPoint == 1)
-                        ScoreItemRow("4. Completed Money Task", liveScore.completedMoneyTaskPoint == 1)
-                        ScoreItemRow("5. Plan tomorrow before ending day", liveScore.plannedTomorrowPoint == 1)
+                        ScoreItemRow("4. Completed at least one priority task (+10 pts)", liveScore.completedAllTasksPoint == 1)
+                        ScoreItemRow("5. Plan tomorrow before ending workday", liveScore.plannedTomorrowPoint == 1)
                     }
                 }
             }
 
             // 4. Finish Workday CTA
             item {
-                Button(
-                    onClick = onFinishWorkday,
+                Box(
                     modifier = Modifier
+                        .widthIn(max = 720.dp)
                         .fillMaxWidth()
-                        .height(52.dp)
-                        .testTag("finish_workday_button"),
-                    shape = RoundedCornerShape(12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = PilotDarkGreen,
-                        contentColor = Color.White
-                    )
                 ) {
-                    Text(
-                        text = "Finish My Workday",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontSize = 15.sp,
-                        fontWeight = FontWeight.Bold
-                    )
+                    Button(
+                        onClick = onFinishWorkday,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(52.dp)
+                            .testTag("finish_workday_button"),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = PilotDarkGreen,
+                            contentColor = Color.White
+                        )
+                    ) {
+                        Text(
+                            text = "Finish My Workday",
+                            style = MaterialTheme.typography.labelLarge,
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
+        }
+
+        // Custom Duration Dialog
+        durationDialogTaskType?.let { taskType ->
+            val curDur = plan.getTaskDuration(taskType)
+            val curTitle = plan.getTaskTitle(taskType)
+            CustomDurationDialog(
+                taskType = taskType,
+                taskTitle = curTitle,
+                currentDuration = curDur,
+                onDismiss = { durationDialogTaskType = null },
+                onConfirmDuration = { newMinutes ->
+                    onUpdateTaskDuration(taskType, newMinutes)
+                    durationDialogTaskType = null
+                }
+            )
         }
     }
 }
@@ -308,8 +386,10 @@ fun TodayScreen(
 fun TaskSlotCard(
     taskType: TaskType,
     taskTitle: String,
+    durationMinutes: Int,
     isCompleted: Boolean,
     onTitleChange: (String) -> Unit,
+    onDurationClick: () -> Unit,
     onToggleComplete: () -> Unit,
     onStartFocus: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -333,16 +413,26 @@ fun TaskSlotCard(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TaskCategoryBadge(taskType = taskType)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    TaskNumberBadge(taskType = taskType)
+                    TaskDurationChip(
+                        durationMinutes = durationMinutes,
+                        onClick = onDurationClick,
+                        modifier = Modifier.testTag("duration_chip_${taskType.name.lowercase()}")
+                    )
+                }
 
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.clickable { onToggleComplete() }
                 ) {
                     Text(
-                        text = if (isCompleted) "Completed" else "Mark Done",
+                        text = if (isCompleted) "+10 pts" else "Mark Done (+10)",
                         style = MaterialTheme.typography.labelSmall,
-                        fontWeight = FontWeight.Medium,
+                        fontWeight = FontWeight.SemiBold,
                         color = if (isCompleted) PilotSuccess else PilotTextSecondary
                     )
                     Spacer(modifier = Modifier.width(4.dp))
@@ -370,7 +460,7 @@ fun TaskSlotCard(
                 },
                 placeholder = {
                     Text(
-                        text = taskType.example,
+                        text = taskType.placeholder,
                         color = PilotTextMuted,
                         style = MaterialTheme.typography.bodyMedium
                     )
@@ -445,7 +535,7 @@ fun TaskSlotCard(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Start Focus",
+                        text = "Start Focus (${durationMinutes} min)",
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Bold
                     )
@@ -504,4 +594,3 @@ private fun ScoreItemRow(label: String, earned: Boolean) {
         )
     }
 }
-

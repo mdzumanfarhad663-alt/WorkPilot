@@ -12,22 +12,26 @@ import com.example.MainActivity
 
 object NotificationHelper {
     private const val CHANNEL_ID = "focuslock_channel"
-    private const val CHANNEL_NAME = "FocusLock Sessions"
+    private const val CHANNEL_NAME = "WorkPilot Sessions"
     private const val NOTIFICATION_ID_COMPLETED = 1001
     private const val NOTIFICATION_ID_START = 1002
 
     fun createNotificationChannel(context: Context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                CHANNEL_NAME,
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                description = "Notifications for focus timer sessions and discipline reminders"
-                enableVibration(true)
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val channel = NotificationChannel(
+                    CHANNEL_ID,
+                    CHANNEL_NAME,
+                    NotificationManager.IMPORTANCE_HIGH
+                ).apply {
+                    description = "Notifications for focus timer sessions and discipline reminders"
+                    enableVibration(true)
+                }
+                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
+                notificationManager?.createNotificationChannel(channel)
             }
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as? NotificationManager
-            notificationManager?.createNotificationChannel(channel)
+        } catch (_: Exception) {
+            // Ignore channel creation errors
         }
     }
 

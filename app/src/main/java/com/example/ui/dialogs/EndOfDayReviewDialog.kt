@@ -1,7 +1,6 @@
 package com.example.ui.dialogs
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,16 +33,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.example.data.model.DailyScoreResult
+import com.example.ui.components.RewardPointsBadge
 import com.example.ui.components.ScoreBadge
 import com.example.ui.theme.PilotBorder
 import com.example.ui.theme.PilotDarkGreen
+import com.example.ui.theme.PilotFailure
 import com.example.ui.theme.PilotGreenContainer
 import com.example.ui.theme.PilotSuccess
-import com.example.ui.theme.PilotTextBody
 import com.example.ui.theme.PilotTextMuted
 import com.example.ui.theme.PilotTextPrimary
 import com.example.ui.theme.PilotTextSecondary
@@ -54,16 +53,16 @@ fun EndOfDayReviewDialog(
     onSubmitReview: (
         completedWhat: String,
         distraction: String,
-        tomorrowMoney: String,
-        tomorrowGrowth: String,
-        tomorrowMaintenance: String
+        tomorrow1: String,
+        tomorrow2: String,
+        tomorrow3: String
     ) -> Unit
 ) {
     var completedWhat by remember { mutableStateOf("") }
     var distraction by remember { mutableStateOf("") }
-    var tomorrowMoney by remember { mutableStateOf("") }
-    var tomorrowGrowth by remember { mutableStateOf("") }
-    var tomorrowMaintenance by remember { mutableStateOf("") }
+    var tomorrow1 by remember { mutableStateOf("") }
+    var tomorrow2 by remember { mutableStateOf("") }
+    var tomorrow3 by remember { mutableStateOf("") }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -91,7 +90,7 @@ fun EndOfDayReviewDialog(
                     color = PilotTextPrimary
                 )
                 Text(
-                    text = "Reflect on today, calculate your score, and plan tomorrow.",
+                    text = "Reflect on today, calculate points & score, and plan tomorrow's 3 tasks.",
                     style = MaterialTheme.typography.bodySmall,
                     color = PilotTextSecondary
                 )
@@ -160,21 +159,21 @@ fun EndOfDayReviewDialog(
                     color = PilotTextPrimary
                 )
                 Text(
-                    text = "Planning tomorrow awards you +1 discipline point for today.",
+                    text = "Plan 3 clear tasks to be ready tomorrow morning.",
                     style = MaterialTheme.typography.bodySmall,
                     color = PilotTextSecondary
                 )
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
-                    value = tomorrowMoney,
-                    onValueChange = { tomorrowMoney = it },
-                    label = { Text("Money Task (Direct Revenue)") },
+                    value = tomorrow1,
+                    onValueChange = { tomorrow1 = it },
+                    label = { Text("Task 1") },
                     placeholder = { Text("e.g. Finish client proposal deliverable", color = PilotTextMuted) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .testTag("review_tomorrow_money_input"),
+                        .testTag("review_tomorrow_1_input"),
                     shape = RoundedCornerShape(10.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = PilotDarkGreen,
@@ -186,14 +185,14 @@ fun EndOfDayReviewDialog(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
-                    value = tomorrowGrowth,
-                    onValueChange = { tomorrowGrowth = it },
-                    label = { Text("Growth Task (Capability/Outreach)") },
-                    placeholder = { Text("e.g. Send 5 new client pitch emails", color = PilotTextMuted) },
+                    value = tomorrow2,
+                    onValueChange = { tomorrow2 = it },
+                    label = { Text("Task 2") },
+                    placeholder = { Text("e.g. Send five tailored outreach emails", color = PilotTextMuted) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .testTag("review_tomorrow_growth_input"),
+                        .testTag("review_tomorrow_2_input"),
                     shape = RoundedCornerShape(10.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = PilotDarkGreen,
@@ -205,14 +204,14 @@ fun EndOfDayReviewDialog(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedTextField(
-                    value = tomorrowMaintenance,
-                    onValueChange = { tomorrowMaintenance = it },
-                    label = { Text("Maintenance Task (Admin/Ops)") },
+                    value = tomorrow3,
+                    onValueChange = { tomorrow3 = it },
+                    label = { Text("Task 3") },
                     placeholder = { Text("e.g. Reply to inbox and send weekly invoice", color = PilotTextMuted) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .testTag("review_tomorrow_maint_input"),
+                        .testTag("review_tomorrow_3_input"),
                     shape = RoundedCornerShape(10.dp),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = PilotDarkGreen,
@@ -244,9 +243,9 @@ fun EndOfDayReviewDialog(
                             onSubmitReview(
                                 completedWhat,
                                 distraction,
-                                tomorrowMoney,
-                                tomorrowGrowth,
-                                tomorrowMaintenance
+                                tomorrow1,
+                                tomorrow2,
+                                tomorrow3
                             )
                         },
                         modifier = Modifier
@@ -271,6 +270,7 @@ fun EndOfDayReviewDialog(
 fun ReviewSummaryDialog(
     scoreResult: DailyScoreResult,
     currentStreak: Int,
+    totalRewardPoints: Int,
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
@@ -296,7 +296,7 @@ fun ReviewSummaryDialog(
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Here is your discipline score for today:",
+                    text = "Here is your discipline & reward summary for today:",
                     style = MaterialTheme.typography.bodySmall,
                     color = PilotTextSecondary
                 )
@@ -320,7 +320,25 @@ fun ReviewSummaryDialog(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         ScoreBadge(score = scoreResult.totalScore, ratingLabel = scoreResult.ratingLabel)
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        // Reward Points Delta
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            val ptsDelta = scoreResult.todayRewardPointsDelta
+                            Text(
+                                text = if (ptsDelta >= 0) "Today: +$ptsDelta pts" else "Today: $ptsDelta pts",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = if (ptsDelta >= 0) PilotSuccess else PilotFailure
+                            )
+                            Text(text = "•", color = PilotTextSecondary)
+                            RewardPointsBadge(points = totalRewardPoints)
+                        }
+
+                        Spacer(modifier = Modifier.height(6.dp))
                         Text(
                             text = if (scoreResult.isSuccessful) "🔥 Streak: $currentStreak days" else "Streak reset to 0 (Score < 4)",
                             style = MaterialTheme.typography.labelMedium,
@@ -336,8 +354,17 @@ fun ReviewSummaryDialog(
                 ScoreBreakdownRow("Planned 3 tasks", scoreResult.plannedThreeTasksPoint == 1)
                 ScoreBreakdownRow("Started within 30 min of schedule", scoreResult.startedOnTimePoint == 1)
                 ScoreBreakdownRow("Completed focus session target", scoreResult.completedTargetSessionsPoint == 1)
-                ScoreBreakdownRow("Completed Money Task", scoreResult.completedMoneyTaskPoint == 1)
+                ScoreBreakdownRow("Completed at least 1 task", scoreResult.completedAllTasksPoint == 1)
                 ScoreBreakdownRow("Planned tomorrow before ending", scoreResult.plannedTomorrowPoint == 1)
+
+                Spacer(modifier = Modifier.height(10.dp))
+                val completedBonus = scoreResult.completedTasksCount * 10
+                val missedPenalty = scoreResult.uncompletedTasksCount * 10
+                Text(
+                    text = "Points Breakdown: +$completedBonus pts (${scoreResult.completedTasksCount} done) - $missedPenalty pts (${scoreResult.uncompletedTasksCount} missed)",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = PilotTextSecondary
+                )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
@@ -382,4 +409,3 @@ private fun ScoreBreakdownRow(label: String, earned: Boolean) {
         )
     }
 }
-

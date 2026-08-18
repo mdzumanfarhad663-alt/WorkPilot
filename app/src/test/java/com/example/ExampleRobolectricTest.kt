@@ -8,7 +8,6 @@ import com.example.data.model.AppBackupData
 import com.example.data.model.DailyScoreResult
 import com.example.data.model.UserSettings
 import com.example.util.BackupHelper
-import com.example.util.DateUtil
 import com.example.util.SpecificityCoach
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -23,61 +22,55 @@ import org.robolectric.annotation.Config
 class ExampleRobolectricTest {
 
   @Test
-  fun `read string from context verifies app name FocusLock`() {
+  fun `read string from context verifies app name WorkPilot`() {
     val context = ApplicationProvider.getApplicationContext<Context>()
     val appName = context.getString(R.string.app_name)
-    assertEquals("FocusLock", appName)
+    assertEquals("WorkPilot", appName)
   }
 
   @Test
-  fun `daily score calculation verifies all 5 points and ratings`() {
-    // 5 points: Excellent
+  fun `daily score and reward points calculation verifies all points and negative ratings`() {
+    // 3 tasks completed: +30 points, 0 missed
     val perfectScore = DailyScoreResult.evaluate(
       plannedThreeTasks = true,
       startedOnTime = true,
       completedTargetSessions = true,
-      completedMoneyTask = true,
+      completedTasksCount = 3,
+      totalTasksCount = 3,
       plannedTomorrow = true
     )
     assertEquals(5, perfectScore.totalScore)
     assertEquals("Excellent", perfectScore.ratingLabel)
     assertTrue(perfectScore.isSuccessful)
+    assertEquals(30, perfectScore.todayRewardPointsDelta)
 
-    // 4 points: Successful
-    val goodScore = DailyScoreResult.evaluate(
+    // 1 task completed, 2 tasks missed: +10 - 20 = -10 points
+    val partialScore = DailyScoreResult.evaluate(
       plannedThreeTasks = true,
       startedOnTime = false,
       completedTargetSessions = true,
-      completedMoneyTask = true,
+      completedTasksCount = 1,
+      totalTasksCount = 3,
       plannedTomorrow = true
     )
-    assertEquals(4, goodScore.totalScore)
-    assertEquals("Successful", goodScore.ratingLabel)
-    assertTrue(goodScore.isSuccessful)
+    assertEquals(4, partialScore.totalScore)
+    assertEquals("Successful", partialScore.ratingLabel)
+    assertTrue(partialScore.isSuccessful)
+    assertEquals(-10, partialScore.todayRewardPointsDelta)
 
-    // 3 points: Needs improvement
-    val okScore = DailyScoreResult.evaluate(
+    // 0 tasks completed, 3 missed: 0 - 30 = -30 points
+    val zeroTaskScore = DailyScoreResult.evaluate(
       plannedThreeTasks = true,
       startedOnTime = false,
-      completedTargetSessions = true,
-      completedMoneyTask = true,
-      plannedTomorrow = false
-    )
-    assertEquals(3, okScore.totalScore)
-    assertEquals("Needs improvement", okScore.ratingLabel)
-    assertFalse(okScore.isSuccessful)
-
-    // <= 2 points: Failed day
-    val lowScore = DailyScoreResult.evaluate(
-      plannedThreeTasks = false,
-      startedOnTime = false,
       completedTargetSessions = false,
-      completedMoneyTask = true,
+      completedTasksCount = 0,
+      totalTasksCount = 3,
       plannedTomorrow = false
     )
-    assertEquals(1, lowScore.totalScore)
-    assertEquals("Failed day", lowScore.ratingLabel)
-    assertFalse(lowScore.isSuccessful)
+    assertEquals(1, zeroTaskScore.totalScore)
+    assertEquals("Failed day", zeroTaskScore.ratingLabel)
+    assertFalse(zeroTaskScore.isSuccessful)
+    assertEquals(-30, zeroTaskScore.todayRewardPointsDelta)
   }
 
   @Test
@@ -93,35 +86,40 @@ class ExampleRobolectricTest {
   }
 
   @Test
-  fun `backup serializer and deserializer preserves data roundtrip`() {
+  fun `backup serializer and deserializer preserves reward points and custom task durations`() {
     val sampleSettings = UserSettings(
       name = "Freelancer Alex",
       normalWorkStartHour = 9,
       normalWorkStartMinute = 30,
       dailyFocusTargetSessions = 3,
-      defaultFocusDurationMinutes = 50,
+      defaultFocusDurationMinutes = 35,
       isFirstTimeSetupCompleted = true,
-      currentStreak = 7
+      currentStreak = 7,
+      totalRewardPoints = 40
     )
     val samplePlan = DailyPlanEntity(
       date = "2026-08-18",
-      moneyTaskTitle = "Build checkout page",
-      moneyTaskCompleted = true,
-      growthTaskTitle = "Send 5 pitches",
-      growthTaskCompleted = true,
-      maintenanceTaskTitle = "Reply to emails",
-      maintenanceTaskCompleted = true,
+      task1Title = "Build checkout page",
+      task1DurationMinutes = 20,
+      task1Completed = true,
+      task2Title = "Send 5 pitches",
+      task2DurationMinutes = 35,
+      task2Completed = true,
+      task3Title = "Reply to emails",
+      task3DurationMinutes = 15,
+      task3Completed = false,
       isWorkdayFinished = true,
-      calculatedScore = 5
+      calculatedScore = 4,
+      rewardPointsEarned = 10
     )
     val sampleSession = FocusSessionEntity(
       id = 1L,
       date = "2026-08-18",
-      taskType = "MONEY",
+      taskType = "TASK_1",
       taskTitle = "Build checkout page",
-      plannedDurationMinutes = 50,
+      plannedDurationMinutes = 20,
       startTimeEpochMillis = 100000L,
-      targetEndTimeEpochMillis = 103000000L,
+      targetEndTimeEpochMillis = 101200000L,
       isCompleted = true
     )
 
@@ -134,14 +132,19 @@ class ExampleRobolectricTest {
     val json = BackupHelper.serializeToJson(backup)
     assertTrue(json.contains("Freelancer Alex"))
     assertTrue(json.contains("Build checkout page"))
+    assertTrue(json.contains("totalRewardPoints"))
 
     val restored = BackupHelper.deserializeFromJson(json)
     assertEquals("Freelancer Alex", restored.userSettings.name)
     assertEquals(9, restored.userSettings.normalWorkStartHour)
     assertEquals(7, restored.userSettings.currentStreak)
+    assertEquals(40, restored.userSettings.totalRewardPoints)
     assertEquals(1, restored.dailyPlans.size)
-    assertEquals("Build checkout page", restored.dailyPlans[0].moneyTaskTitle)
+    assertEquals("Build checkout page", restored.dailyPlans[0].task1Title)
+    assertEquals(20, restored.dailyPlans[0].task1DurationMinutes)
+    assertEquals(35, restored.dailyPlans[0].task2DurationMinutes)
+    assertEquals(15, restored.dailyPlans[0].task3DurationMinutes)
     assertEquals(1, restored.focusSessions.size)
-    assertEquals("MONEY", restored.focusSessions[0].taskType)
+    assertEquals("TASK_1", restored.focusSessions[0].taskType)
   }
 }

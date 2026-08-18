@@ -19,7 +19,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -58,8 +57,9 @@ data class FocusLockUiState(
                 plannedThreeTasks = plan.areAllThreeTasksPlanned,
                 startedOnTime = plan.isStartedOnTime,
                 completedTargetSessions = completedSessionsCount >= userSettings.dailyFocusTargetSessions,
-                completedMoneyTask = plan.moneyTaskCompleted,
-                plannedTomorrow = plan.tomorrowMoneyTask.isNotBlank() || plan.tomorrowGrowthTask.isNotBlank() || plan.tomorrowMaintenanceTask.isNotBlank() || plan.completedReview
+                completedTasksCount = plan.completedTasksCount,
+                totalTasksCount = 3,
+                plannedTomorrow = plan.tomorrowTask1.isNotBlank() || plan.tomorrowTask2.isNotBlank() || plan.tomorrowTask3.isNotBlank() || plan.completedReview
             )
         }
 }
@@ -197,7 +197,8 @@ class FocusLockViewModel(application: Application) : AndroidViewModel(applicatio
                 dailyFocusTargetSessions = dailyTarget,
                 defaultFocusDurationMinutes = durationMinutes,
                 isFirstTimeSetupCompleted = true,
-                currentStreak = 0
+                currentStreak = 0,
+                totalRewardPoints = 0
             )
             repository.saveUserSettings(updated)
             _messageToast.value = "Setup completed. Let's make today count!"
@@ -208,51 +209,74 @@ class FocusLockViewModel(application: Application) : AndroidViewModel(applicatio
         viewModelScope.launch {
             val currentPlan = repository.getOrCreateDailyPlan(todayDate)
             val updatedPlan = when (taskType) {
-                TaskType.MONEY -> currentPlan.copy(moneyTaskTitle = title.trim())
-                TaskType.GROWTH -> currentPlan.copy(growthTaskTitle = title.trim())
-                TaskType.MAINTENANCE -> currentPlan.copy(maintenanceTaskTitle = title.trim())
+                TaskType.TASK_1 -> currentPlan.copy(task1Title = title.trim())
+                TaskType.TASK_2 -> currentPlan.copy(task2Title = title.trim())
+                TaskType.TASK_3 -> currentPlan.copy(task3Title = title.trim())
             }
             repository.updateDailyPlan(updatedPlan)
+        }
+    }
+
+    fun updateTaskDuration(taskType: TaskType, durationMinutes: Int) {
+        viewModelScope.launch {
+            val cleanDuration = durationMinutes.coerceIn(1, 300)
+            val currentPlan = repository.getOrCreateDailyPlan(todayDate)
+            val updatedPlan = when (taskType) {
+                TaskType.TASK_1 -> currentPlan.copy(task1DurationMinutes = cleanDuration)
+                TaskType.TASK_2 -> currentPlan.copy(task2DurationMinutes = cleanDuration)
+                TaskType.TASK_3 -> currentPlan.copy(task3DurationMinutes = cleanDuration)
+            }
+            repository.updateDailyPlan(updatedPlan)
+            _messageToast.value = "${taskType.displayName} timer set to $cleanDuration min"
         }
     }
 
     fun toggleTaskComplete(taskType: TaskType) {
         viewModelScope.launch {
             val currentPlan = repository.getOrCreateDailyPlan(todayDate)
+            val currentlyDone = currentPlan.isTaskCompleted(taskType)
+            val newDone = !currentlyDone
+
             val updatedPlan = when (taskType) {
-                TaskType.MONEY -> currentPlan.copy(moneyTaskCompleted = !currentPlan.moneyTaskCompleted)
-                TaskType.GROWTH -> currentPlan.copy(growthTaskCompleted = !currentPlan.growthTaskCompleted)
-                TaskType.MAINTENANCE -> currentPlan.copy(maintenanceTaskCompleted = !currentPlan.maintenanceTaskCompleted)
+                TaskType.TASK_1 -> currentPlan.copy(task1Completed = newDone)
+                TaskType.TASK_2 -> currentPlan.copy(task2Completed = newDone)
+                TaskType.TASK_3 -> currentPlan.copy(task3Completed = newDone)
             }
             repository.updateDailyPlan(updatedPlan)
+
+            if (newDone) {
+                repository.updateRewardPoints(10)
+                _messageToast.value = "+10 Reward Points! 🏆"
+            } else {
+                repository.updateRewardPoints(-10)
+                _messageToast.value = "-10 Reward Points"
+            }
         }
     }
 
-    fun startFocusSession(taskType: TaskType, taskTitle: String, durationMinutes: Int? = null) {
-        val cleanTitle = if (taskTitle.isBlank()) {
-            when (taskType) {
-                TaskType.MONEY -> "Money Task: Revenue Generation"
-                TaskType.GROWTH -> "Growth Task: System & Skill Upgrade"
-                TaskType.MAINTENANCE -> "Maintenance Task: Admin & Operations"
-            }
-        } else {
-            taskTitle.trim()
-        }
+    fun startFocusSession(taskType: TaskType, taskTitle: String, customDurationMinutes: Int? = null) {
         viewModelScope.launch {
-            // Ensure the daily plan stores this task title as well
             val currentPlan = repository.getOrCreateDailyPlan(todayDate)
+            val cleanTitle = if (taskTitle.isBlank()) {
+                currentPlan.getTaskTitle(taskType).ifBlank { taskType.displayName }
+            } else {
+                taskTitle.trim()
+            }
+
+            val chosenDuration = customDurationMinutes
+                ?: currentPlan.getTaskDuration(taskType)
+
             val updatedPlan = when (taskType) {
-                TaskType.MONEY -> currentPlan.copy(moneyTaskTitle = cleanTitle)
-                TaskType.GROWTH -> currentPlan.copy(growthTaskTitle = cleanTitle)
-                TaskType.MAINTENANCE -> currentPlan.copy(maintenanceTaskTitle = cleanTitle)
+                TaskType.TASK_1 -> currentPlan.copy(task1Title = cleanTitle, task1DurationMinutes = chosenDuration)
+                TaskType.TASK_2 -> currentPlan.copy(task2Title = cleanTitle, task2DurationMinutes = chosenDuration)
+                TaskType.TASK_3 -> currentPlan.copy(task3Title = cleanTitle, task3DurationMinutes = chosenDuration)
             }
             repository.updateDailyPlan(updatedPlan)
 
-            val duration = durationMinutes ?: repository.userSettings.value.defaultFocusDurationMinutes
-            repository.startFocusSession(todayDate, taskType, cleanTitle, duration)
+            repository.startFocusSession(todayDate, taskType, cleanTitle, chosenDuration)
             _selectedTab.value = NavigationTab.FOCUS
             startOrSyncTimerTicker()
-            _messageToast.value = "Focus session started: $cleanTitle"
+            _messageToast.value = "Focus started: $cleanTitle ($chosenDuration min)"
         }
     }
 
@@ -284,7 +308,7 @@ class FocusLockViewModel(application: Application) : AndroidViewModel(applicatio
             repository.completeFocusSession(isTaskCompleted)
             _dialogState.value = _dialogState.value.copy(showTaskCompletionConfirmDialog = false)
             _selectedTab.value = NavigationTab.TODAY
-            _messageToast.value = if (isTaskCompleted) "Great job! Task marked complete." else "Session recorded! Task kept active."
+            _messageToast.value = if (isTaskCompleted) "+10 Reward Points! Task marked complete." else "Session recorded! Task kept active."
         }
     }
 
@@ -308,9 +332,9 @@ class FocusLockViewModel(application: Application) : AndroidViewModel(applicatio
     fun submitEndOfDayReview(
         whatCompleted: String,
         distraction: String,
-        tomorrowMoney: String,
-        tomorrowGrowth: String,
-        tomorrowMaintenance: String
+        tomorrow1: String,
+        tomorrow2: String,
+        tomorrow3: String
     ) {
         viewModelScope.launch {
             val hasUnfinished = uiState.value.todayPlan?.areAllTasksCompleted == false
@@ -318,9 +342,9 @@ class FocusLockViewModel(application: Application) : AndroidViewModel(applicatio
                 date = todayDate,
                 completedWhat = whatCompleted.trim(),
                 distraction = distraction.trim(),
-                tomorrowMoney = tomorrowMoney.trim(),
-                tomorrowGrowth = tomorrowGrowth.trim(),
-                tomorrowMaintenance = tomorrowMaintenance.trim(),
+                tomorrow1 = tomorrow1.trim(),
+                tomorrow2 = tomorrow2.trim(),
+                tomorrow3 = tomorrow3.trim(),
                 hasUnfinishedWork = hasUnfinished
             )
             _lastReviewResult.value = result

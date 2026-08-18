@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Lock
@@ -54,7 +53,6 @@ import com.example.ui.theme.PilotBorder
 import com.example.ui.theme.PilotDarkGreen
 import com.example.ui.theme.PilotGreenContainer
 import com.example.ui.theme.PilotSurface
-import com.example.ui.theme.PilotTextMuted
 import com.example.ui.theme.PilotTextSecondary
 import com.example.ui.theme.WorkPilotTheme
 import com.example.ui.viewmodel.FocusLockUiState
@@ -133,8 +131,8 @@ class MainActivity : ComponentActivity() {
                 if (uiState.showEndOfDayReviewDialog) {
                     EndOfDayReviewDialog(
                         onDismiss = { viewModel.closeEndOfDayReviewDialog() },
-                        onSubmitReview = { what, dist, mTask, gTask, maintTask ->
-                            viewModel.submitEndOfDayReview(what, dist, mTask, gTask, maintTask)
+                        onSubmitReview = { what, dist, t1, t2, t3 ->
+                            viewModel.submitEndOfDayReview(what, dist, t1, t2, t3)
                         }
                     )
                 }
@@ -143,6 +141,7 @@ class MainActivity : ComponentActivity() {
                     ReviewSummaryDialog(
                         scoreResult = result,
                         currentStreak = uiState.userSettings.currentStreak,
+                        totalRewardPoints = uiState.userSettings.totalRewardPoints,
                         onDismiss = { viewModel.dismissLastReviewSummary() }
                     )
                 }
@@ -275,8 +274,9 @@ fun WorkPilotMainApp(
                         liveScore = uiState.liveDailyScore,
                         completedSessionsCount = uiState.todaySessions.count { it.isCompleted },
                         onUpdateTask = { type, title -> viewModel.updateTask(type, title) },
+                        onUpdateTaskDuration = { type, duration -> viewModel.updateTaskDuration(type, duration) },
                         onToggleTaskComplete = { type -> viewModel.toggleTaskComplete(type) },
-                        onStartFocus = { type, title -> viewModel.startFocusSession(type, title) },
+                        onStartFocus = { type, title, duration -> viewModel.startFocusSession(type, title, duration) },
                         onFinishWorkday = { viewModel.requestFinishWorkday() }
                     )
                 }
@@ -289,6 +289,7 @@ fun WorkPilotMainApp(
                         remainingMillis = uiState.remainingMillis,
                         isEligibleToFinishEarly = uiState.isEligibleToFinishEarly,
                         onStartSession = { type, title, duration -> viewModel.startFocusSession(type, title, duration) },
+                        onUpdateTaskDuration = { type, duration -> viewModel.updateTaskDuration(type, duration) },
                         onPauseClick = { viewModel.openPauseDialog() },
                         onResumeClick = { viewModel.resumeFocusSession() },
                         onGiveUpClick = { viewModel.openGiveUpDialog() },
@@ -308,4 +309,3 @@ fun WorkPilotMainApp(
         }
     }
 }
-

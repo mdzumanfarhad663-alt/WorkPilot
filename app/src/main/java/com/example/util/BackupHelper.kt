@@ -10,8 +10,8 @@ import org.json.JSONObject
 object BackupHelper {
     fun serializeToJson(backupData: AppBackupData): String {
         val root = JSONObject()
-        root.put("app", "FocusLock")
-        root.put("version", 1)
+        root.put("app", "WorkPilot")
+        root.put("version", 2)
         root.put("exportedAt", backupData.exportedAt)
 
         val settingsObj = JSONObject().apply {
@@ -22,6 +22,7 @@ object BackupHelper {
             put("defaultFocusDurationMinutes", backupData.userSettings.defaultFocusDurationMinutes)
             put("isFirstTimeSetupCompleted", backupData.userSettings.isFirstTimeSetupCompleted)
             put("currentStreak", backupData.userSettings.currentStreak)
+            put("totalRewardPoints", backupData.userSettings.totalRewardPoints)
             put("lastEvaluatedDate", backupData.userSettings.lastEvaluatedDate)
         }
         root.put("userSettings", settingsObj)
@@ -30,12 +31,15 @@ object BackupHelper {
         for (plan in backupData.dailyPlans) {
             val p = JSONObject().apply {
                 put("date", plan.date)
-                put("moneyTaskTitle", plan.moneyTaskTitle)
-                put("moneyTaskCompleted", plan.moneyTaskCompleted)
-                put("growthTaskTitle", plan.growthTaskTitle)
-                put("growthTaskCompleted", plan.growthTaskCompleted)
-                put("maintenanceTaskTitle", plan.maintenanceTaskTitle)
-                put("maintenanceTaskCompleted", plan.maintenanceTaskCompleted)
+                put("task1Title", plan.task1Title)
+                put("task1Completed", plan.task1Completed)
+                put("task1DurationMinutes", plan.task1DurationMinutes)
+                put("task2Title", plan.task2Title)
+                put("task2Completed", plan.task2Completed)
+                put("task2DurationMinutes", plan.task2DurationMinutes)
+                put("task3Title", plan.task3Title)
+                put("task3Completed", plan.task3Completed)
+                put("task3DurationMinutes", plan.task3DurationMinutes)
                 put("isWorkdayStarted", plan.isWorkdayStarted)
                 put("workdayStartTimeMillis", plan.workdayStartTimeMillis ?: 0L)
                 put("isStartedOnTime", plan.isStartedOnTime)
@@ -44,10 +48,11 @@ object BackupHelper {
                 put("completedReview", plan.completedReview)
                 put("completedSummaryWhat", plan.completedSummaryWhat)
                 put("completedSummaryDistraction", plan.completedSummaryDistraction)
-                put("tomorrowMoneyTask", plan.tomorrowMoneyTask)
-                put("tomorrowGrowthTask", plan.tomorrowGrowthTask)
-                put("tomorrowMaintenanceTask", plan.tomorrowMaintenanceTask)
+                put("tomorrowTask1", plan.tomorrowTask1)
+                put("tomorrowTask2", plan.tomorrowTask2)
+                put("tomorrowTask3", plan.tomorrowTask3)
                 put("calculatedScore", plan.calculatedScore)
+                put("rewardPointsEarned", plan.rewardPointsEarned)
                 put("isScoreFinalized", plan.isScoreFinalized)
             }
             plansArray.put(p)
@@ -92,6 +97,7 @@ object BackupHelper {
             defaultFocusDurationMinutes = settingsObj.optInt("defaultFocusDurationMinutes", 25),
             isFirstTimeSetupCompleted = settingsObj.optBoolean("isFirstTimeSetupCompleted", true),
             currentStreak = settingsObj.optInt("currentStreak", 0),
+            totalRewardPoints = settingsObj.optInt("totalRewardPoints", 0),
             lastEvaluatedDate = settingsObj.optString("lastEvaluatedDate", "")
         )
 
@@ -99,15 +105,35 @@ object BackupHelper {
         val plansArray = root.optJSONArray("dailyPlans") ?: JSONArray()
         for (i in 0 until plansArray.length()) {
             val p = plansArray.getJSONObject(i)
+            // Support backward compatibility if older keys existed
+            val t1 = if (p.has("task1Title")) p.optString("task1Title", "") else p.optString("moneyTaskTitle", "")
+            val t1Done = if (p.has("task1Completed")) p.optBoolean("task1Completed", false) else p.optBoolean("moneyTaskCompleted", false)
+            val t1Dur = p.optInt("task1DurationMinutes", 25)
+
+            val t2 = if (p.has("task2Title")) p.optString("task2Title", "") else p.optString("growthTaskTitle", "")
+            val t2Done = if (p.has("task2Completed")) p.optBoolean("task2Completed", false) else p.optBoolean("growthTaskCompleted", false)
+            val t2Dur = p.optInt("task2DurationMinutes", 25)
+
+            val t3 = if (p.has("task3Title")) p.optString("task3Title", "") else p.optString("maintenanceTaskTitle", "")
+            val t3Done = if (p.has("task3Completed")) p.optBoolean("task3Completed", false) else p.optBoolean("maintenanceTaskCompleted", false)
+            val t3Dur = p.optInt("task3DurationMinutes", 25)
+
+            val tm1 = if (p.has("tomorrowTask1")) p.optString("tomorrowTask1", "") else p.optString("tomorrowMoneyTask", "")
+            val tm2 = if (p.has("tomorrowTask2")) p.optString("tomorrowTask2", "") else p.optString("tomorrowGrowthTask", "")
+            val tm3 = if (p.has("tomorrowTask3")) p.optString("tomorrowTask3", "") else p.optString("tomorrowMaintenanceTask", "")
+
             dailyPlans.add(
                 DailyPlanEntity(
                     date = p.optString("date", ""),
-                    moneyTaskTitle = p.optString("moneyTaskTitle", ""),
-                    moneyTaskCompleted = p.optBoolean("moneyTaskCompleted", false),
-                    growthTaskTitle = p.optString("growthTaskTitle", ""),
-                    growthTaskCompleted = p.optBoolean("growthTaskCompleted", false),
-                    maintenanceTaskTitle = p.optString("maintenanceTaskTitle", ""),
-                    maintenanceTaskCompleted = p.optBoolean("maintenanceTaskCompleted", false),
+                    task1Title = t1,
+                    task1Completed = t1Done,
+                    task1DurationMinutes = t1Dur,
+                    task2Title = t2,
+                    task2Completed = t2Done,
+                    task2DurationMinutes = t2Dur,
+                    task3Title = t3,
+                    task3Completed = t3Done,
+                    task3DurationMinutes = t3Dur,
                     isWorkdayStarted = p.optBoolean("isWorkdayStarted", false),
                     workdayStartTimeMillis = if (p.has("workdayStartTimeMillis")) p.optLong("workdayStartTimeMillis") else null,
                     isStartedOnTime = p.optBoolean("isStartedOnTime", false),
@@ -116,10 +142,11 @@ object BackupHelper {
                     completedReview = p.optBoolean("completedReview", false),
                     completedSummaryWhat = p.optString("completedSummaryWhat", ""),
                     completedSummaryDistraction = p.optString("completedSummaryDistraction", ""),
-                    tomorrowMoneyTask = p.optString("tomorrowMoneyTask", ""),
-                    tomorrowGrowthTask = p.optString("tomorrowGrowthTask", ""),
-                    tomorrowMaintenanceTask = p.optString("tomorrowMaintenanceTask", ""),
+                    tomorrowTask1 = tm1,
+                    tomorrowTask2 = tm2,
+                    tomorrowTask3 = tm3,
                     calculatedScore = p.optInt("calculatedScore", 0),
+                    rewardPointsEarned = p.optInt("rewardPointsEarned", 0),
                     isScoreFinalized = p.optBoolean("isScoreFinalized", false)
                 )
             )
@@ -133,7 +160,7 @@ object BackupHelper {
                 FocusSessionEntity(
                     id = s.optLong("id", 0L),
                     date = s.optString("date", ""),
-                    taskType = s.optString("taskType", "MONEY"),
+                    taskType = s.optString("taskType", "TASK_1"),
                     taskTitle = s.optString("taskTitle", ""),
                     plannedDurationMinutes = s.optInt("plannedDurationMinutes", 25),
                     startTimeEpochMillis = s.optLong("startTimeEpochMillis", 0L),

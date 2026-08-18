@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -38,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import com.example.data.local.DailyPlanEntity
 import com.example.data.local.FocusSessionEntity
 import com.example.data.model.UserSettings
+import com.example.ui.components.RewardPointsBadge
 import com.example.ui.components.ScoreBadge
 import com.example.ui.theme.PilotBorder
 import com.example.ui.theme.PilotDarkGreen
@@ -45,11 +47,9 @@ import com.example.ui.theme.PilotFailure
 import com.example.ui.theme.PilotGreenContainer
 import com.example.ui.theme.PilotSuccess
 import com.example.ui.theme.PilotTextBody
-import com.example.ui.theme.PilotTextMuted
 import com.example.ui.theme.PilotTextPrimary
 import com.example.ui.theme.PilotTextSecondary
 import com.example.ui.theme.PilotWarning
-import com.example.ui.theme.PilotWarningBg
 import com.example.util.DateUtil
 
 @Composable
@@ -65,25 +65,25 @@ fun HistoryScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.TopCenter
+            .background(MaterialTheme.colorScheme.background)
     ) {
         LazyColumn(
-            modifier = Modifier
-                .widthIn(max = 720.dp)
-                .fillMaxSize(),
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            contentPadding = PaddingValues(
                 start = 16.dp,
                 end = 16.dp,
                 top = 16.dp,
-                bottom = 48.dp
+                bottom = 80.dp
             ),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             // Header & Backup buttons
             item {
                 Surface(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .widthIn(max = 720.dp)
+                        .fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.surface,
                     border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
@@ -109,19 +109,25 @@ fun HistoryScreen(
                                 )
                             }
 
-                            // Current Streak
-                            Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(20.dp))
-                                    .background(PilotGreenContainer)
-                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(
-                                    text = "🔥 ${userSettings.currentStreak} days",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = PilotSuccess
-                                )
+                                RewardPointsBadge(points = userSettings.totalRewardPoints)
+
+                                Box(
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(20.dp))
+                                        .background(PilotGreenContainer)
+                                        .padding(horizontal = 10.dp, vertical = 6.dp)
+                                ) {
+                                    Text(
+                                        text = "🔥 ${userSettings.currentStreak}d",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = PilotSuccess
+                                    )
+                                }
                             }
                         }
 
@@ -179,7 +185,9 @@ fun HistoryScreen(
             if (completedWorkdays.isEmpty()) {
                 item {
                     Surface(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .widthIn(max = 720.dp)
+                            .fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp),
                         color = MaterialTheme.colorScheme.surface,
                         border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
@@ -218,17 +226,19 @@ fun HistoryScreen(
                         else -> "Failed day"
                     }
 
-                    HistoryDayCard(
-                        plan = plan,
-                        completedSessionsCount = completedSessions,
-                        targetSessions = userSettings.dailyFocusTargetSessions,
-                        scoreLabel = scoreLabel
-                    )
+                    Box(
+                        modifier = Modifier
+                            .widthIn(max = 720.dp)
+                            .fillMaxWidth()
+                    ) {
+                        HistoryDayCard(
+                            plan = plan,
+                            completedSessionsCount = completedSessions,
+                            targetSessions = userSettings.dailyFocusTargetSessions,
+                            scoreLabel = scoreLabel
+                        )
+                    }
                 }
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(24.dp))
             }
         }
     }
@@ -270,7 +280,19 @@ fun HistoryDayCard(
                     )
                 }
 
-                ScoreBadge(score = plan.calculatedScore, ratingLabel = scoreLabel)
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val pts = plan.rewardPointsEarned
+                    Text(
+                        text = if (pts >= 0) "+$pts pts" else "$pts pts",
+                        style = MaterialTheme.typography.labelSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = if (pts >= 0) PilotSuccess else PilotFailure
+                    )
+                    ScoreBadge(score = plan.calculatedScore, ratingLabel = scoreLabel)
+                }
             }
 
             if (plan.completedSummaryWhat.isNotBlank()) {
@@ -309,7 +331,7 @@ fun HistoryDayCard(
             if (plan.workdayFinishedWithUnfinishedWork) {
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
-                    text = "⚠️ Ended with unfinished tasks",
+                    text = "⚠️ Ended with unfinished tasks (-10 pts per task)",
                     style = MaterialTheme.typography.labelSmall,
                     color = PilotFailure
                 )
@@ -317,4 +339,3 @@ fun HistoryDayCard(
         }
     }
 }
-

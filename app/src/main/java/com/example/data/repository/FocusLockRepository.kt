@@ -30,12 +30,16 @@ class FocusLockRepository(
         // Check if yesterday had planned tomorrow tasks
         val yesterdayDate = DateUtil.getYesterdayDateString()
         val yesterdayPlan = dao.getDailyPlanSync(yesterdayDate)
+        val defaultDuration = userSettings.value.defaultFocusDurationMinutes
 
         val newPlan = DailyPlanEntity(
             date = date,
-            moneyTaskTitle = yesterdayPlan?.tomorrowMoneyTask ?: "",
-            growthTaskTitle = yesterdayPlan?.tomorrowGrowthTask ?: "",
-            maintenanceTaskTitle = yesterdayPlan?.tomorrowMaintenanceTask ?: ""
+            task1Title = yesterdayPlan?.tomorrowTask1 ?: "",
+            task1DurationMinutes = defaultDuration,
+            task2Title = yesterdayPlan?.tomorrowTask2 ?: "",
+            task2DurationMinutes = defaultDuration,
+            task3Title = yesterdayPlan?.tomorrowTask3 ?: "",
+            task3DurationMinutes = defaultDuration
         )
         dao.insertDailyPlan(newPlan)
         return newPlan
@@ -58,6 +62,10 @@ class FocusLockRepository(
 
     fun updateStreak(streak: Int, lastDate: String) {
         preferences.updateStreak(streak, lastDate)
+    }
+
+    fun updateRewardPoints(delta: Int) {
+        preferences.updateRewardPoints(delta)
     }
 
     // Active session persistence
@@ -214,12 +222,18 @@ class FocusLockRepository(
 
         if (isTaskFinished) {
             val plan = getOrCreateDailyPlan(entity?.date ?: DateUtil.getTodayDateString())
+            val wasAlreadyComplete = plan.isTaskCompleted(current.taskType)
             val updatedPlan = when (current.taskType) {
-                TaskType.MONEY -> plan.copy(moneyTaskCompleted = true)
-                TaskType.GROWTH -> plan.copy(growthTaskCompleted = true)
-                TaskType.MAINTENANCE -> plan.copy(maintenanceTaskCompleted = true)
+                TaskType.TASK_1 -> plan.copy(task1Completed = true)
+                TaskType.TASK_2 -> plan.copy(task2Completed = true)
+                TaskType.TASK_3 -> plan.copy(task3Completed = true)
             }
             dao.insertDailyPlan(updatedPlan)
+
+            if (!wasAlreadyComplete) {
+                // Award +10 points
+                updateRewardPoints(10)
+            }
         }
 
         clearActiveSession()
@@ -229,9 +243,9 @@ class FocusLockRepository(
         date: String,
         completedWhat: String,
         distraction: String,
-        tomorrowMoney: String,
-        tomorrowGrowth: String,
-        tomorrowMaintenance: String,
+        tomorrow1: String,
+        tomorrow2: String,
+        tomorrow3: String,
         hasUnfinishedWork: Boolean
     ): DailyScoreResult {
         val plan = getOrCreateDailyPlan(date)
@@ -243,9 +257,17 @@ class FocusLockRepository(
             plannedThreeTasks = plan.areAllThreeTasksPlanned,
             startedOnTime = plan.isStartedOnTime,
             completedTargetSessions = completedSessionsCount >= settings.dailyFocusTargetSessions,
-            completedMoneyTask = plan.moneyTaskCompleted,
-            plannedTomorrow = tomorrowMoney.isNotBlank() || tomorrowGrowth.isNotBlank() || tomorrowMaintenance.isNotBlank()
+            completedTasksCount = plan.completedTasksCount,
+            totalTasksCount = 3,
+            plannedTomorrow = tomorrow1.isNotBlank() || tomorrow2.isNotBlank() || tomorrow3.isNotBlank()
         )
+
+        // Deduct 10 points for each uncompleted task at end of day
+        val uncompletedCount = plan.uncompletedTasksCount
+        if (uncompletedCount > 0) {
+            // Apply uncompleted task deduction (-10 per uncompleted task)
+            updateRewardPoints(-10 * uncompletedCount)
+        }
 
         val updatedPlan = plan.copy(
             isWorkdayFinished = true,
@@ -253,10 +275,11 @@ class FocusLockRepository(
             completedReview = true,
             completedSummaryWhat = completedWhat,
             completedSummaryDistraction = distraction,
-            tomorrowMoneyTask = tomorrowMoney,
-            tomorrowGrowthTask = tomorrowGrowth,
-            tomorrowMaintenanceTask = tomorrowMaintenance,
+            tomorrowTask1 = tomorrow1,
+            tomorrowTask2 = tomorrow2,
+            tomorrowTask3 = tomorrow3,
             calculatedScore = scoreResult.totalScore,
+            rewardPointsEarned = scoreResult.todayRewardPointsDelta,
             isScoreFinalized = true
         )
         dao.insertDailyPlan(updatedPlan)
@@ -276,9 +299,12 @@ class FocusLockRepository(
             dao.insertDailyPlan(
                 DailyPlanEntity(
                     date = tomorrowDate,
-                    moneyTaskTitle = tomorrowMoney,
-                    growthTaskTitle = tomorrowGrowth,
-                    maintenanceTaskTitle = tomorrowMaintenance
+                    task1Title = tomorrow1,
+                    task1DurationMinutes = plan.task1DurationMinutes,
+                    task2Title = tomorrow2,
+                    task2DurationMinutes = plan.task2DurationMinutes,
+                    task3Title = tomorrow3,
+                    task3DurationMinutes = plan.task3DurationMinutes
                 )
             )
         }

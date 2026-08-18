@@ -8,6 +8,7 @@ data class UserSettings(
     val defaultFocusDurationMinutes: Int = 25, // 25, 50, or 90
     val isFirstTimeSetupCompleted: Boolean = false,
     val currentStreak: Int = 0,
+    val totalRewardPoints: Int = 0, // Cumulative reward balance (+10 per task done, -10 per task missed)
     val lastEvaluatedDate: String = "",
     val restDays: List<Int> = listOf(6, 7) // 6=Saturday, 7=Sunday
 ) {

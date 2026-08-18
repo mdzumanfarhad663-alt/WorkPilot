@@ -3,7 +3,7 @@ package com.example.data.model
 data class ActiveSessionState(
     val isActive: Boolean = false,
     val sessionId: Long = 0L,
-    val taskType: TaskType = TaskType.MONEY,
+    val taskType: TaskType = TaskType.TASK_1,
     val taskTitle: String = "",
     val durationMinutes: Int = 25,
     val startTimeMillis: Long = 0L,

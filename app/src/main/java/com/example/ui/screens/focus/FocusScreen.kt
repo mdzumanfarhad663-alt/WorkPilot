@@ -3,11 +3,10 @@ package com.example.ui.screens.focus
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,10 +16,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Lock
@@ -35,7 +33,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -53,15 +51,15 @@ import com.example.data.local.DailyPlanEntity
 import com.example.data.model.ActiveSessionState
 import com.example.data.model.TaskType
 import com.example.data.model.UserSettings
-import com.example.ui.components.TaskCategoryBadge
-import com.example.ui.screens.setup.SelectionChip
+import com.example.ui.components.TaskDurationChip
+import com.example.ui.components.TaskNumberBadge
+import com.example.ui.dialogs.CustomDurationDialog
 import com.example.ui.theme.PilotBorder
 import com.example.ui.theme.PilotDarkGreen
 import com.example.ui.theme.PilotFailure
 import com.example.ui.theme.PilotFailureBg
 import com.example.ui.theme.PilotGreenContainer
 import com.example.ui.theme.PilotSuccess
-import com.example.ui.theme.PilotTextBody
 import com.example.ui.theme.PilotTextMuted
 import com.example.ui.theme.PilotTextPrimary
 import com.example.ui.theme.PilotTextSecondary
@@ -77,36 +75,44 @@ fun FocusScreen(
     remainingMillis: Long,
     isEligibleToFinishEarly: Boolean,
     onStartSession: (TaskType, String, Int) -> Unit,
+    onUpdateTaskDuration: (TaskType, Int) -> Unit,
     onPauseClick: () -> Unit,
     onResumeClick: () -> Unit,
     onGiveUpClick: () -> Unit,
     onFinishSessionClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
+    LazyColumn(
         modifier = modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 20.dp),
-        contentAlignment = Alignment.TopCenter
+            .background(MaterialTheme.colorScheme.background),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        contentPadding = PaddingValues(
+            start = 16.dp,
+            end = 16.dp,
+            top = 20.dp,
+            bottom = 80.dp
+        ),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        if (activeSession.isActive) {
-            ActiveFocusView(
-                session = activeSession,
-                remainingMillis = remainingMillis,
-                isEligibleToFinishEarly = isEligibleToFinishEarly,
-                onPauseClick = onPauseClick,
-                onResumeClick = onResumeClick,
-                onGiveUpClick = onGiveUpClick,
-                onFinishSessionClick = onFinishSessionClick
-            )
-        } else {
-            IdleFocusLauncherView(
-                userSettings = userSettings,
-                todayPlan = todayPlan,
-                onStartSession = onStartSession
-            )
+        item {
+            if (activeSession.isActive) {
+                ActiveFocusView(
+                    session = activeSession,
+                    remainingMillis = remainingMillis,
+                    isEligibleToFinishEarly = isEligibleToFinishEarly,
+                    onPauseClick = onPauseClick,
+                    onResumeClick = onResumeClick,
+                    onGiveUpClick = onGiveUpClick,
+                    onFinishSessionClick = onFinishSessionClick
+                )
+            } else {
+                IdleFocusLauncherView(
+                    todayPlan = todayPlan,
+                    onStartSession = onStartSession,
+                    onUpdateTaskDuration = onUpdateTaskDuration
+                )
+            }
         }
     }
 }
@@ -144,8 +150,8 @@ private fun ActiveFocusView(
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Task info
-            TaskCategoryBadge(taskType = session.taskType)
+            // Task number badge
+            TaskNumberBadge(taskType = session.taskType)
             Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = session.taskTitle,
@@ -308,29 +314,17 @@ private fun ActiveFocusView(
 
 @Composable
 private fun IdleFocusLauncherView(
-    userSettings: UserSettings,
     todayPlan: DailyPlanEntity?,
-    onStartSession: (TaskType, String, Int) -> Unit
+    onStartSession: (TaskType, String, Int) -> Unit,
+    onUpdateTaskDuration: (TaskType, Int) -> Unit
 ) {
     val plan = todayPlan ?: DailyPlanEntity(date = DateUtil.getTodayDateString())
-    var selectedDuration by remember { mutableIntStateOf(userSettings.defaultFocusDurationMinutes) }
+    var durationDialogTaskType by remember { mutableStateOf<TaskType?>(null) }
 
     val taskEntries = listOf(
-        Triple(
-            TaskType.MONEY,
-            plan.moneyTaskTitle.ifBlank { "Money Task (Direct Revenue)" },
-            plan.moneyTaskCompleted
-        ),
-        Triple(
-            TaskType.GROWTH,
-            plan.growthTaskTitle.ifBlank { "Growth Task (Capability & Pipeline)" },
-            plan.growthTaskCompleted
-        ),
-        Triple(
-            TaskType.MAINTENANCE,
-            plan.maintenanceTaskTitle.ifBlank { "Maintenance Task (Admin & Ops)" },
-            plan.maintenanceTaskCompleted
-        )
+        TaskType.TASK_1 to (plan.task1Title.ifBlank { "Task 1" } to plan.task1Completed),
+        TaskType.TASK_2 to (plan.task2Title.ifBlank { "Task 2" } to plan.task2Completed),
+        TaskType.TASK_3 to (plan.task3Title.ifBlank { "Task 3" } to plan.task3Completed)
     )
 
     Surface(
@@ -372,7 +366,7 @@ private fun IdleFocusLauncherView(
                 color = PilotTextPrimary
             )
             Text(
-                text = "Pick a priority and duration to enter undivided focus mode.",
+                text = "Each task has its own customizable timer. Pick any duration (e.g. 5, 20, 35 min) and focus.",
                 style = MaterialTheme.typography.bodySmall,
                 color = PilotTextSecondary,
                 textAlign = TextAlign.Center
@@ -380,92 +374,95 @@ private fun IdleFocusLauncherView(
 
             Spacer(modifier = Modifier.height(20.dp))
 
-            // Duration selector
             Text(
-                text = "Session Duration",
+                text = "Select Task & Timer",
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
                 color = PilotTextPrimary,
                 modifier = Modifier.align(Alignment.Start)
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                listOf(25, 50, 90).forEach { dur ->
-                    val isSelected = selectedDuration == dur
-                    SelectionChip(
-                        text = "$dur min",
-                        isSelected = isSelected,
-                        onClick = { selectedDuration = dur },
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Text(
-                text = "Select Task to Focus On",
-                style = MaterialTheme.typography.labelMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = PilotTextPrimary,
-                modifier = Modifier.align(Alignment.Start)
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             Column(
                 modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                taskEntries.forEach { (type, title, isDone) ->
+                taskEntries.forEach { (type, pair) ->
+                    val (title, isDone) = pair
+                    val duration = plan.getTaskDuration(type)
+
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clickable { onStartSession(type, title, selectedDuration) }
                             .testTag("select_focus_${type.name.lowercase()}"),
                         shape = RoundedCornerShape(12.dp),
                         color = if (isDone) Color(0xFFF8FAFC) else MaterialTheme.colorScheme.surface,
-                        border = androidx.compose.foundation.BorderStroke(1.dp, if (isDone) Color(0xFFBBF7D0) else PilotBorder)
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            if (isDone) Color(0xFFBBF7D0) else PilotBorder
+                        )
                     ) {
-                        Row(
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(14.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
+                                .padding(14.dp)
                         ) {
-                            Column(modifier = Modifier.weight(1f)) {
-                                TaskCategoryBadge(taskType = type)
-                                Spacer(modifier = Modifier.height(4.dp))
-                                Text(
-                                    text = title,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = if (isDone) PilotTextMuted else PilotTextPrimary
-                                )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    TaskNumberBadge(taskType = type)
+                                    TaskDurationChip(
+                                        durationMinutes = duration,
+                                        onClick = { durationDialogTaskType = type }
+                                    )
+                                }
+
                                 if (isDone) {
                                     Text(
-                                        text = "✓ Completed today",
+                                        text = "✓ Completed (+10 pts)",
                                         style = MaterialTheme.typography.labelSmall,
                                         color = PilotSuccess,
-                                        fontWeight = FontWeight.Medium
+                                        fontWeight = FontWeight.SemiBold
                                     )
                                 }
                             }
 
-                            Spacer(modifier = Modifier.width(8.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
+
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = if (isDone) PilotTextMuted else PilotTextPrimary
+                            )
+
+                            Spacer(modifier = Modifier.height(10.dp))
 
                             Button(
-                                onClick = { onStartSession(type, title, selectedDuration) },
+                                onClick = { onStartSession(type, title, duration) },
+                                modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(8.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = PilotDarkGreen,
                                     contentColor = Color.White
                                 )
                             ) {
-                                Text("Start ($selectedDuration m)", fontWeight = FontWeight.SemiBold)
+                                Icon(
+                                    imageVector = Icons.Default.PlayArrow,
+                                    contentDescription = "Start",
+                                    modifier = Modifier.size(16.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = "Start Focus ($duration min)",
+                                    fontWeight = FontWeight.SemiBold
+                                )
                             }
                         }
                     }
@@ -473,5 +470,20 @@ private fun IdleFocusLauncherView(
             }
         }
     }
-}
 
+    // Custom Duration Dialog
+    durationDialogTaskType?.let { taskType ->
+        val curDur = plan.getTaskDuration(taskType)
+        val curTitle = plan.getTaskTitle(taskType)
+        CustomDurationDialog(
+            taskType = taskType,
+            taskTitle = curTitle,
+            currentDuration = curDur,
+            onDismiss = { durationDialogTaskType = null },
+            onConfirmDuration = { newMinutes ->
+                onUpdateTaskDuration(taskType, newMinutes)
+                durationDialogTaskType = null
+            }
+        )
+    }
+}

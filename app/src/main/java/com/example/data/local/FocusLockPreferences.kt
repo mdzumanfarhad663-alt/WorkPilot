@@ -27,6 +27,7 @@ class FocusLockPreferences(context: Context) {
             defaultFocusDurationMinutes = prefs.getInt("default_focus_duration", 25),
             isFirstTimeSetupCompleted = prefs.getBoolean("setup_completed", false),
             currentStreak = prefs.getInt("current_streak", 0),
+            totalRewardPoints = prefs.getInt("total_reward_points", 0),
             lastEvaluatedDate = prefs.getString("last_evaluated_date", "") ?: ""
         )
     }
@@ -40,6 +41,7 @@ class FocusLockPreferences(context: Context) {
             .putInt("default_focus_duration", settings.defaultFocusDurationMinutes)
             .putBoolean("setup_completed", settings.isFirstTimeSetupCompleted)
             .putInt("current_streak", settings.currentStreak)
+            .putInt("total_reward_points", settings.totalRewardPoints)
             .putString("last_evaluated_date", settings.lastEvaluatedDate)
             .apply()
         _userSettings.value = settings
@@ -53,16 +55,27 @@ class FocusLockPreferences(context: Context) {
         saveUserSettings(updated)
     }
 
+    fun updateRewardPoints(delta: Int) {
+        val currentPoints = _userSettings.value.totalRewardPoints
+        val updated = _userSettings.value.copy(
+            totalRewardPoints = currentPoints + delta
+        )
+        saveUserSettings(updated)
+    }
+
+    fun setTotalRewardPoints(points: Int) {
+        val updated = _userSettings.value.copy(
+            totalRewardPoints = points
+        )
+        saveUserSettings(updated)
+    }
+
     private fun loadActiveSession(): ActiveSessionState {
         val isActive = prefs.getBoolean("session_is_active", false)
         if (!isActive) return ActiveSessionState()
 
-        val taskTypeName = prefs.getString("session_task_type", TaskType.MONEY.name) ?: TaskType.MONEY.name
-        val taskType = try {
-            TaskType.valueOf(taskTypeName)
-        } catch (_: Exception) {
-            TaskType.MONEY
-        }
+        val taskTypeName = prefs.getString("session_task_type", TaskType.TASK_1.name) ?: TaskType.TASK_1.name
+        val taskType = TaskType.fromString(taskTypeName)
 
         return ActiveSessionState(
             isActive = true,
