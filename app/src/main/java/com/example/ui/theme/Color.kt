@@ -2,37 +2,49 @@ package com.example.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// FocusLock Brand Palette
-val FocusDarkGreen = Color(0xFF155E48)       // Primary brand green
-val FocusLightGreen = Color(0xFF96D2A8)      // Accent mint green
-val FocusGreenContainer = Color(0xFFE6F4EA)  // Soft mint badge/container
-val FocusOnGreenContainer = Color(0xFF0D3B2E)
+// WorkPilot Brand Palette (Clean, Premium Light Theme)
+val PilotDarkGreen = Color(0xFF155E48)       // Primary button #155E48
+val PilotLightGreen = Color(0xFF86EFAC)      // Accent mint green
+val PilotGreenContainer = Color(0xFFDCFCE7)  // Soft green container
+val PilotOnGreenContainer = Color(0xFF14532D)
 
-val FocusBackground = Color(0xFFF7F8FA)      // Soft calm off-white slate
-val FocusSurface = Color(0xFFFFFFFF)         // White card surface
-val FocusBorder = Color(0xFFE5E7EB)          // Subtle card border
-val FocusTextPrimary = Color(0xFF111827)     // Main high contrast text
-val FocusTextSecondary = Color(0xFF4B5563)   // Secondary text
-val FocusTextMuted = Color(0xFF9CA3AF)       // Subtle placeholder/muted text
+val PilotBackground = Color(0xFFF8FAFC)      // Page background #F8FAFC
+val PilotSurface = Color(0xFFFFFFFF)         // Cards #FFFFFF
+val PilotBorder = Color(0xFFE2E8F0)          // Borders #E2E8F0
+val PilotTextPrimary = Color(0xFF0F172A)     // Main headings #0F172A
+val PilotTextBody = Color(0xFF334155)        // Body text #334155
+val PilotTextSecondary = Color(0xFF64748B)   // Secondary text #64748B
+val PilotTextMuted = Color(0xFF94A3B8)       // Slate 400 - Placeholder / muted
 
 // State colors
-val FocusWarning = Color(0xFFF59E0B)         // Warning Amber
-val FocusWarningBg = Color(0xFFFEF3C7)       // Warning Light container
-val FocusFailure = Color(0xFFDC2626)         // Failure Crimson
-val FocusFailureBg = Color(0xFFFEE2E2)       // Failure Light container
-val FocusSuccess = Color(0xFF155E48)
+val PilotSuccess = Color(0xFF15803D)         // Success #15803D
+val PilotSuccessBg = Color(0xFFDCFCE7)
+val PilotWarning = Color(0xFF92400E)         // Warning text #92400E
+val PilotWarningBg = Color(0xFFFEF3C7)       // Warning background #FEF3C7
+val PilotFailure = Color(0xFFDC2626)         // Failure Crimson
+val PilotFailureBg = Color(0xFFFEE2E2)
 
 // Task Category Colors
 val CategoryMoneyBg = Color(0xFFECFDF5)
-val CategoryMoneyText = Color(0xFF047857)
+val CategoryMoneyText = Color(0xFF15803D)
 val CategoryGrowthBg = Color(0xFFEFF6FF)
-val CategoryGrowthText = Color(0xFF1D4ED8)
-val CategoryMaintenanceBg = Color(0xFFF3F4F6)
-val CategoryMaintenanceText = Color(0xFF4B5563)
+val CategoryGrowthText = Color(0xFF2563EB)
+val CategoryMaintenanceBg = Color(0xFFF1F5F9)
+val CategoryMaintenanceText = Color(0xFF475569)
 
-// Dark Theme Variants
-val DarkBackground = Color(0xFF0F172A)
-val DarkSurface = Color(0xFF1E293B)
-val DarkBorder = Color(0xFF334155)
-val DarkTextPrimary = Color(0xFFF8FAFC)
-val DarkTextSecondary = Color(0xFF94A3B8)
+// Backwards compatibility aliases
+val FocusDarkGreen = PilotDarkGreen
+val FocusLightGreen = PilotLightGreen
+val FocusGreenContainer = PilotGreenContainer
+val FocusOnGreenContainer = PilotOnGreenContainer
+val FocusBackground = PilotBackground
+val FocusSurface = PilotSurface
+val FocusBorder = PilotBorder
+val FocusTextPrimary = PilotTextPrimary
+val FocusTextSecondary = PilotTextSecondary
+val FocusTextMuted = PilotTextMuted
+val FocusWarning = PilotWarning
+val FocusWarningBg = PilotWarningBg
+val FocusFailure = PilotFailure
+val FocusFailureBg = PilotFailureBg
+val FocusSuccess = PilotSuccess

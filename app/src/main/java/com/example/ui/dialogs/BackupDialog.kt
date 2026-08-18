@@ -42,11 +42,14 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.example.ui.theme.FocusBorder
-import com.example.ui.theme.FocusDarkGreen
-import com.example.ui.theme.FocusFailure
-import com.example.ui.theme.FocusTextPrimary
-import com.example.ui.theme.FocusTextSecondary
+import com.example.ui.theme.PilotBorder
+import com.example.ui.theme.PilotDarkGreen
+import com.example.ui.theme.PilotFailure
+import com.example.ui.theme.PilotSuccess
+import com.example.ui.theme.PilotTextBody
+import com.example.ui.theme.PilotTextMuted
+import com.example.ui.theme.PilotTextPrimary
+import com.example.ui.theme.PilotTextSecondary
 import kotlinx.coroutines.launch
 
 @Composable
@@ -80,7 +83,8 @@ fun BackupDialog(
                 .fillMaxWidth(0.92f),
             shape = RoundedCornerShape(16.dp),
             color = MaterialTheme.colorScheme.surface,
-            border = androidx.compose.foundation.BorderStroke(1.dp, FocusBorder)
+            border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
+            shadowElevation = 2.dp
         ) {
             Column(
                 modifier = Modifier
@@ -92,13 +96,13 @@ fun BackupDialog(
                     text = "Backup & Data",
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Bold,
-                    color = FocusTextPrimary
+                    color = PilotTextPrimary
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = "Export or restore your FocusLock settings, tasks, and history.",
+                    text = "Export or restore your WorkPilot settings, tasks, and history.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = FocusTextSecondary
+                    color = PilotTextSecondary
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -106,17 +110,29 @@ fun BackupDialog(
                 TabRow(
                     selectedTabIndex = selectedTab,
                     containerColor = Color.Transparent,
-                    contentColor = FocusDarkGreen
+                    contentColor = PilotDarkGreen
                 ) {
                     Tab(
                         selected = selectedTab == 0,
                         onClick = { selectedTab = 0 },
-                        text = { Text("Export Backup") }
+                        text = {
+                            Text(
+                                "Export Backup",
+                                fontWeight = if (selectedTab == 0) FontWeight.Bold else FontWeight.Medium,
+                                color = if (selectedTab == 0) PilotDarkGreen else PilotTextSecondary
+                            )
+                        }
                     )
                     Tab(
                         selected = selectedTab == 1,
                         onClick = { selectedTab = 1 },
-                        text = { Text("Import Backup") }
+                        text = {
+                            Text(
+                                "Import Backup",
+                                fontWeight = if (selectedTab == 1) FontWeight.Bold else FontWeight.Medium,
+                                color = if (selectedTab == 1) PilotDarkGreen else PilotTextSecondary
+                            )
+                        }
                     )
                 }
 
@@ -127,7 +143,8 @@ fun BackupDialog(
                     Text(
                         text = "JSON Data Backup:",
                         style = MaterialTheme.typography.labelMedium,
-                        color = FocusTextPrimary
+                        fontWeight = FontWeight.Bold,
+                        color = PilotTextPrimary
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     OutlinedTextField(
@@ -139,10 +156,12 @@ fun BackupDialog(
                             .height(200.dp)
                             .testTag("export_json_field"),
                         textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace, fontSize = 11.sp),
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(10.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = FocusBorder,
-                            focusedBorderColor = FocusDarkGreen
+                            unfocusedBorderColor = PilotBorder,
+                            focusedBorderColor = PilotDarkGreen,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface
                         )
                     )
                     Spacer(modifier = Modifier.height(12.dp))
@@ -151,7 +170,8 @@ fun BackupDialog(
                         Text(
                             text = copyStatus,
                             style = MaterialTheme.typography.labelSmall,
-                            color = FocusDarkGreen
+                            fontWeight = FontWeight.SemiBold,
+                            color = PilotSuccess
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
@@ -162,28 +182,32 @@ fun BackupDialog(
                     ) {
                         OutlinedButton(
                             onClick = onDismiss,
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(8.dp)
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder)
                         ) {
-                            Text("Close")
+                            Text("Close", color = PilotTextPrimary, fontWeight = FontWeight.SemiBold)
                         }
                         Button(
                             onClick = {
                                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                                val clip = ClipData.newPlainText("FocusLock Backup", exportJson)
+                                val clip = ClipData.newPlainText("WorkPilot Backup", exportJson)
                                 clipboard.setPrimaryClip(clip)
                                 copyStatus = "Copied to clipboard!"
                             },
                             modifier = Modifier
                                 .weight(1f)
+                                .height(48.dp)
                                 .testTag("copy_export_button"),
-                            shape = RoundedCornerShape(8.dp),
+                            shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = FocusDarkGreen,
+                                containerColor = PilotDarkGreen,
                                 contentColor = Color.White
                             )
                         ) {
-                            Text("Copy JSON")
+                            Text("Copy JSON", fontWeight = FontWeight.Bold)
                         }
                     }
                 } else {
@@ -191,7 +215,8 @@ fun BackupDialog(
                     Text(
                         text = "Paste Backup JSON:",
                         style = MaterialTheme.typography.labelMedium,
-                        color = FocusTextPrimary
+                        fontWeight = FontWeight.Bold,
+                        color = PilotTextPrimary
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     OutlinedTextField(
@@ -200,16 +225,18 @@ fun BackupDialog(
                             importJson = it
                             importError = null
                         },
-                        placeholder = { Text("Paste valid FocusLock JSON here...") },
+                        placeholder = { Text("Paste valid WorkPilot JSON here...", color = PilotTextMuted) },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp)
                             .testTag("import_json_field"),
                         textStyle = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace, fontSize = 11.sp),
-                        shape = RoundedCornerShape(8.dp),
+                        shape = RoundedCornerShape(10.dp),
                         colors = OutlinedTextFieldDefaults.colors(
-                            unfocusedBorderColor = FocusBorder,
-                            focusedBorderColor = FocusDarkGreen
+                            unfocusedBorderColor = PilotBorder,
+                            focusedBorderColor = PilotDarkGreen,
+                            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                            focusedContainerColor = MaterialTheme.colorScheme.surface
                         )
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -218,7 +245,8 @@ fun BackupDialog(
                         Text(
                             text = err,
                             style = MaterialTheme.typography.labelSmall,
-                            color = FocusFailure
+                            fontWeight = FontWeight.Medium,
+                            color = PilotFailure
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                     }
@@ -229,10 +257,13 @@ fun BackupDialog(
                     ) {
                         OutlinedButton(
                             onClick = onDismiss,
-                            modifier = Modifier.weight(1f),
-                            shape = RoundedCornerShape(8.dp)
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp),
+                            shape = RoundedCornerShape(10.dp),
+                            border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder)
                         ) {
-                            Text("Cancel")
+                            Text("Cancel", color = PilotTextPrimary, fontWeight = FontWeight.SemiBold)
                         }
                         Button(
                             onClick = {
@@ -248,14 +279,15 @@ fun BackupDialog(
                             },
                             modifier = Modifier
                                 .weight(1f)
+                                .height(48.dp)
                                 .testTag("restore_backup_button"),
-                            shape = RoundedCornerShape(8.dp),
+                            shape = RoundedCornerShape(10.dp),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = FocusDarkGreen,
+                                containerColor = PilotDarkGreen,
                                 contentColor = Color.White
                             )
                         ) {
-                            Text("Restore Data")
+                            Text("Restore Data", fontWeight = FontWeight.Bold)
                         }
                     }
                 }
@@ -263,3 +295,4 @@ fun BackupDialog(
         }
     }
 }
+

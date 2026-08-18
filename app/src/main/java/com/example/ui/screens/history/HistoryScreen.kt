@@ -19,7 +19,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ArrowUpward
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -40,12 +39,17 @@ import com.example.data.local.DailyPlanEntity
 import com.example.data.local.FocusSessionEntity
 import com.example.data.model.UserSettings
 import com.example.ui.components.ScoreBadge
-import com.example.ui.theme.FocusBorder
-import com.example.ui.theme.FocusDarkGreen
-import com.example.ui.theme.FocusGreenContainer
-import com.example.ui.theme.FocusTextMuted
-import com.example.ui.theme.FocusTextPrimary
-import com.example.ui.theme.FocusTextSecondary
+import com.example.ui.theme.PilotBorder
+import com.example.ui.theme.PilotDarkGreen
+import com.example.ui.theme.PilotFailure
+import com.example.ui.theme.PilotGreenContainer
+import com.example.ui.theme.PilotSuccess
+import com.example.ui.theme.PilotTextBody
+import com.example.ui.theme.PilotTextMuted
+import com.example.ui.theme.PilotTextPrimary
+import com.example.ui.theme.PilotTextSecondary
+import com.example.ui.theme.PilotWarning
+import com.example.ui.theme.PilotWarningBg
 import com.example.util.DateUtil
 
 @Composable
@@ -82,7 +86,8 @@ fun HistoryScreen(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     color = MaterialTheme.colorScheme.surface,
-                    border = androidx.compose.foundation.BorderStroke(1.dp, FocusBorder)
+                    border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
+                    shadowElevation = 1.dp
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Row(
@@ -95,12 +100,12 @@ fun HistoryScreen(
                                     text = "Workday History",
                                     style = MaterialTheme.typography.headlineSmall,
                                     fontWeight = FontWeight.Bold,
-                                    color = FocusTextPrimary
+                                    color = PilotTextPrimary
                                 )
                                 Text(
                                     text = "Discipline track record and past reviews",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = FocusTextSecondary
+                                    color = PilotTextSecondary
                                 )
                             }
 
@@ -108,19 +113,19 @@ fun HistoryScreen(
                             Box(
                                 modifier = Modifier
                                     .clip(RoundedCornerShape(20.dp))
-                                    .background(FocusGreenContainer)
+                                    .background(PilotGreenContainer)
                                     .padding(horizontal = 12.dp, vertical = 6.dp)
                             ) {
                                 Text(
                                     text = "🔥 ${userSettings.currentStreak} days",
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = FocusDarkGreen
+                                    color = PilotSuccess
                                 )
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(14.dp))
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         // Backup Action Row
                         Row(
@@ -131,10 +136,11 @@ fun HistoryScreen(
                                 onClick = onOpenBackupDialog,
                                 modifier = Modifier
                                     .weight(1f)
+                                    .height(44.dp)
                                     .testTag("backup_data_button"),
                                 shape = RoundedCornerShape(8.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = FocusDarkGreen,
+                                    containerColor = PilotDarkGreen,
                                     contentColor = Color.White
                                 )
                             ) {
@@ -144,24 +150,26 @@ fun HistoryScreen(
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Export Backup")
+                                Text("Export Backup", fontWeight = FontWeight.SemiBold)
                             }
 
                             OutlinedButton(
                                 onClick = onOpenBackupDialog,
                                 modifier = Modifier
                                     .weight(1f)
+                                    .height(44.dp)
                                     .testTag("import_data_button"),
-                                shape = RoundedCornerShape(8.dp)
+                                shape = RoundedCornerShape(8.dp),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder)
                             ) {
                                 Icon(
                                     imageVector = Icons.Default.ArrowDownward,
                                     contentDescription = "Import",
-                                    tint = FocusTextPrimary,
+                                    tint = PilotTextPrimary,
                                     modifier = Modifier.size(16.dp)
                                 )
                                 Spacer(modifier = Modifier.width(6.dp))
-                                Text("Import Backup", color = FocusTextPrimary)
+                                Text("Import Backup", color = PilotTextPrimary, fontWeight = FontWeight.SemiBold)
                             }
                         }
                     }
@@ -174,7 +182,8 @@ fun HistoryScreen(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp),
                         color = MaterialTheme.colorScheme.surface,
-                        border = androidx.compose.foundation.BorderStroke(1.dp, FocusBorder)
+                        border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
+                        shadowElevation = 1.dp
                     ) {
                         Column(
                             modifier = Modifier
@@ -186,13 +195,13 @@ fun HistoryScreen(
                                 text = "No past records yet",
                                 style = MaterialTheme.typography.titleMedium,
                                 fontWeight = FontWeight.Bold,
-                                color = FocusTextPrimary
+                                color = PilotTextPrimary
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
                                 text = "Complete today's focus sessions and end your workday to generate your first score entry.",
                                 style = MaterialTheme.typography.bodySmall,
-                                color = FocusTextSecondary,
+                                color = PilotTextSecondary,
                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
                             )
                         }
@@ -238,7 +247,7 @@ fun HistoryDayCard(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
         color = MaterialTheme.colorScheme.surface,
-        border = androidx.compose.foundation.BorderStroke(1.dp, FocusBorder),
+        border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
         shadowElevation = 1.dp
     ) {
         Column(modifier = Modifier.padding(18.dp)) {
@@ -252,12 +261,12 @@ fun HistoryDayCard(
                         text = displayDate,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = FocusTextPrimary
+                        color = PilotTextPrimary
                     )
                     Text(
                         text = "${plan.completedTasksCount}/3 tasks completed • $completedSessionsCount/$targetSessions focus sessions",
                         style = MaterialTheme.typography.bodySmall,
-                        color = FocusTextSecondary
+                        color = PilotTextSecondary
                     )
                 }
 
@@ -270,12 +279,12 @@ fun HistoryDayCard(
                     text = "Outcomes:",
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.SemiBold,
-                    color = FocusDarkGreen
+                    color = PilotDarkGreen
                 )
                 Text(
                     text = plan.completedSummaryWhat,
                     style = MaterialTheme.typography.bodySmall,
-                    color = FocusTextPrimary
+                    color = PilotTextBody
                 )
             }
 
@@ -285,14 +294,14 @@ fun HistoryDayCard(
                     Icon(
                         imageVector = Icons.Default.Warning,
                         contentDescription = "Main distraction",
-                        tint = Color(0xFFB45309),
+                        tint = PilotWarning,
                         modifier = Modifier.size(14.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "Main Distraction: ${plan.completedSummaryDistraction}",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Color(0xFF92400E)
+                        color = PilotWarning
                     )
                 }
             }
@@ -302,9 +311,10 @@ fun HistoryDayCard(
                 Text(
                     text = "⚠️ Ended with unfinished tasks",
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(0xFFDC2626)
+                    color = PilotFailure
                 )
             }
         }
     }
 }
+

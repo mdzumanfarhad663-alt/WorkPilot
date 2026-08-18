@@ -40,13 +40,14 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.ui.theme.FocusBorder
-import com.example.ui.theme.FocusDarkGreen
-import com.example.ui.theme.FocusGreenContainer
-import com.example.ui.theme.FocusLightGreen
-import com.example.ui.theme.FocusTextMuted
-import com.example.ui.theme.FocusTextPrimary
-import com.example.ui.theme.FocusTextSecondary
+import com.example.ui.theme.PilotBorder
+import com.example.ui.theme.PilotDarkGreen
+import com.example.ui.theme.PilotGreenContainer
+import com.example.ui.theme.PilotSuccess
+import com.example.ui.theme.PilotTextBody
+import com.example.ui.theme.PilotTextMuted
+import com.example.ui.theme.PilotTextPrimary
+import com.example.ui.theme.PilotTextSecondary
 
 @Composable
 fun FirstTimeSetupScreen(
@@ -81,8 +82,8 @@ fun FirstTimeSetupScreen(
                 .fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             color = MaterialTheme.colorScheme.surface,
-            border = androidx.compose.foundation.BorderStroke(1.dp, FocusBorder),
-            shadowElevation = 2.dp
+            border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
+            shadowElevation = 1.dp
         ) {
             Column(
                 modifier = Modifier
@@ -97,26 +98,27 @@ fun FirstTimeSetupScreen(
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
-                            .background(FocusGreenContainer)
-                            .padding(8.dp)
+                            .background(PilotGreenContainer)
+                            .padding(10.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Lock,
-                            contentDescription = "FocusLock",
-                            tint = FocusDarkGreen
+                            contentDescription = "WorkPilot",
+                            tint = PilotDarkGreen
                         )
                     }
                     Column {
                         Text(
-                            text = "Welcome to FocusLock",
+                            text = "Welcome to WorkPilot",
                             style = MaterialTheme.typography.headlineSmall,
-                            color = FocusTextPrimary,
+                            color = PilotTextPrimary,
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Calm, minimal discipline for freelancers.",
+                            text = "Plan. Focus. Finish.",
                             style = MaterialTheme.typography.bodySmall,
-                            color = FocusTextSecondary
+                            color = PilotTextSecondary,
+                            fontWeight = FontWeight.Medium
                         )
                     }
                 }
@@ -127,22 +129,24 @@ fun FirstTimeSetupScreen(
                 Text(
                     text = "1. What is your name?",
                     style = MaterialTheme.typography.titleMedium,
-                    color = FocusTextPrimary,
-                    fontWeight = FontWeight.SemiBold
+                    color = PilotTextPrimary,
+                    fontWeight = FontWeight.Bold
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    placeholder = { Text("Your name (e.g. Alex)") },
+                    placeholder = { Text("Your name (e.g. Alex)", color = PilotTextMuted) },
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
                         .testTag("setup_name_input"),
                     shape = RoundedCornerShape(10.dp),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = FocusDarkGreen,
-                        unfocusedBorderColor = FocusBorder
+                        focusedBorderColor = PilotDarkGreen,
+                        unfocusedBorderColor = PilotBorder,
+                        focusedContainerColor = MaterialTheme.colorScheme.surface,
+                        unfocusedContainerColor = MaterialTheme.colorScheme.surface
                     )
                 )
 
@@ -152,15 +156,15 @@ fun FirstTimeSetupScreen(
                 Text(
                     text = "2. Normal work starting time",
                     style = MaterialTheme.typography.titleMedium,
-                    color = FocusTextPrimary,
-                    fontWeight = FontWeight.SemiBold
+                    color = PilotTextPrimary,
+                    fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "You get full discipline credit if you begin within 30 minutes.",
+                    text = "You get full discipline credit if you begin within 30 minutes of this time.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = FocusTextMuted
+                    color = PilotTextSecondary
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -185,10 +189,10 @@ fun FirstTimeSetupScreen(
                 Text(
                     text = "3. Daily focus target (sessions)",
                     style = MaterialTheme.typography.titleMedium,
-                    color = FocusTextPrimary,
-                    fontWeight = FontWeight.SemiBold
+                    color = PilotTextPrimary,
+                    fontWeight = FontWeight.Bold
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -210,10 +214,10 @@ fun FirstTimeSetupScreen(
                 Text(
                     text = "4. Focus session duration",
                     style = MaterialTheme.typography.titleMedium,
-                    color = FocusTextPrimary,
-                    fontWeight = FontWeight.SemiBold
+                    color = PilotTextPrimary,
+                    fontWeight = FontWeight.Bold
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(10.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -239,11 +243,11 @@ fun FirstTimeSetupScreen(
                     },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp)
+                        .height(52.dp)
                         .testTag("complete_setup_button"),
-                    shape = RoundedCornerShape(10.dp),
+                    shape = RoundedCornerShape(12.dp),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = FocusDarkGreen,
+                        containerColor = PilotDarkGreen,
                         contentColor = Color.White
                     )
                 ) {
@@ -270,11 +274,11 @@ fun SelectionChip(
         modifier = modifier
             .clip(RoundedCornerShape(8.dp))
             .border(
-                width = if (isSelected) 2.dp else 1.dp,
-                color = if (isSelected) FocusDarkGreen else FocusBorder,
+                width = if (isSelected) 1.5.dp else 1.dp,
+                color = if (isSelected) PilotDarkGreen else PilotBorder,
                 shape = RoundedCornerShape(8.dp)
             )
-            .background(if (isSelected) FocusGreenContainer else Color.Transparent)
+            .background(if (isSelected) PilotGreenContainer else Color.Transparent)
             .clickable(onClick = onClick)
             .padding(vertical = 10.dp, horizontal = 4.dp),
         contentAlignment = Alignment.Center
@@ -283,7 +287,8 @@ fun SelectionChip(
             text = text,
             style = MaterialTheme.typography.labelMedium,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            color = if (isSelected) FocusDarkGreen else FocusTextPrimary
+            color = if (isSelected) PilotDarkGreen else PilotTextPrimary
         )
     }
 }
+

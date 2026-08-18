@@ -1,6 +1,6 @@
 {
-  "name": "FocusLock",
-  "description": "A calm, minimal daily focus and discipline app for freelancers.",
+  "name": "WorkPilot",
+  "description": "Plan. Focus. Finish. A clean, premium daily focus and discipline system for freelancers.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

@@ -55,15 +55,18 @@ import com.example.data.model.TaskType
 import com.example.data.model.UserSettings
 import com.example.ui.components.TaskCategoryBadge
 import com.example.ui.screens.setup.SelectionChip
-import com.example.ui.theme.FocusBorder
-import com.example.ui.theme.FocusDarkGreen
-import com.example.ui.theme.FocusFailure
-import com.example.ui.theme.FocusGreenContainer
-import com.example.ui.theme.FocusLightGreen
-import com.example.ui.theme.FocusTextMuted
-import com.example.ui.theme.FocusTextPrimary
-import com.example.ui.theme.FocusTextSecondary
-import com.example.ui.theme.FocusWarning
+import com.example.ui.theme.PilotBorder
+import com.example.ui.theme.PilotDarkGreen
+import com.example.ui.theme.PilotFailure
+import com.example.ui.theme.PilotFailureBg
+import com.example.ui.theme.PilotGreenContainer
+import com.example.ui.theme.PilotSuccess
+import com.example.ui.theme.PilotTextBody
+import com.example.ui.theme.PilotTextMuted
+import com.example.ui.theme.PilotTextPrimary
+import com.example.ui.theme.PilotTextSecondary
+import com.example.ui.theme.PilotWarning
+import com.example.ui.theme.PilotWarningBg
 import com.example.util.DateUtil
 
 @Composable
@@ -130,10 +133,10 @@ private fun ActiveFocusView(
         modifier = Modifier
             .widthIn(max = 560.dp)
             .fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surface,
-        border = androidx.compose.foundation.BorderStroke(1.dp, FocusBorder),
-        shadowElevation = 2.dp
+        border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
+        shadowElevation = 1.dp
     ) {
         Column(
             modifier = Modifier
@@ -148,7 +151,7 @@ private fun ActiveFocusView(
                 text = session.taskTitle,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = FocusTextPrimary,
+                color = PilotTextPrimary,
                 textAlign = TextAlign.Center
             )
 
@@ -163,12 +166,12 @@ private fun ActiveFocusView(
                     val strokeWidth = 14.dp.toPx()
                     // Background track
                     drawCircle(
-                        color = Color(0xFFE5E7EB),
+                        color = Color(0xFFE2E8F0),
                         style = Stroke(width = strokeWidth)
                     )
                     // Progress arc
                     drawArc(
-                        color = if (session.isPaused) FocusWarning else FocusDarkGreen,
+                        color = if (session.isPaused) Color(0xFFF59E0B) else PilotDarkGreen,
                         startAngle = -90f,
                         sweepAngle = progress * 360f,
                         useCenter = false,
@@ -182,13 +185,13 @@ private fun ActiveFocusView(
                         style = MaterialTheme.typography.headlineLarge,
                         fontSize = 42.sp,
                         fontWeight = FontWeight.Bold,
-                        color = FocusTextPrimary
+                        color = PilotTextPrimary
                     )
                     Text(
                         text = if (session.isPaused) "PAUSED: ${session.pauseReason ?: ""}" else "${session.durationMinutes} MIN SESSION",
                         style = MaterialTheme.typography.labelMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = if (session.isPaused) FocusWarning else FocusTextSecondary
+                        color = if (session.isPaused) PilotWarning else PilotTextSecondary
                     )
                 }
             }
@@ -201,13 +204,14 @@ private fun ActiveFocusView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFFF3F4F6))
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                        .background(PilotWarningBg)
+                        .padding(horizontal = 14.dp, vertical = 10.dp)
                 ) {
                     Text(
-                        text = "Discipline rule: Complete at least 80% ($eightyPercentMin min) before marking session finished.",
+                        text = "Discipline Rule: Complete at least 80% ($eightyPercentMin min) before marking session finished.",
                         style = MaterialTheme.typography.bodySmall,
-                        color = FocusTextSecondary,
+                        color = PilotWarning,
+                        fontWeight = FontWeight.Medium,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -231,13 +235,13 @@ private fun ActiveFocusView(
                             .testTag("resume_session_button"),
                         shape = RoundedCornerShape(10.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = FocusDarkGreen,
+                            containerColor = PilotDarkGreen,
                             contentColor = Color.White
                         )
                     ) {
                         Icon(Icons.Default.PlayArrow, contentDescription = "Resume")
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Resume")
+                        Text("Resume", fontWeight = FontWeight.SemiBold)
                     }
                 } else {
                     OutlinedButton(
@@ -246,11 +250,12 @@ private fun ActiveFocusView(
                             .weight(1f)
                             .height(48.dp)
                             .testTag("pause_session_button"),
-                        shape = RoundedCornerShape(10.dp)
+                        shape = RoundedCornerShape(10.dp),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder)
                     ) {
-                        Icon(Icons.Default.Pause, contentDescription = "Pause", tint = FocusTextPrimary)
+                        Icon(Icons.Default.Pause, contentDescription = "Pause", tint = PilotTextPrimary)
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Pause", color = FocusTextPrimary)
+                        Text("Pause", color = PilotTextPrimary, fontWeight = FontWeight.SemiBold)
                     }
                 }
 
@@ -262,17 +267,18 @@ private fun ActiveFocusView(
                         .height(48.dp)
                         .testTag("give_up_session_button"),
                     shape = RoundedCornerShape(10.dp),
+                    border = androidx.compose.foundation.BorderStroke(1.dp, PilotFailureBg),
                     colors = ButtonDefaults.outlinedButtonColors(
-                        contentColor = FocusFailure
+                        contentColor = PilotFailure
                     )
                 ) {
-                    Icon(Icons.Default.Close, contentDescription = "Give Up", tint = FocusFailure)
+                    Icon(Icons.Default.Close, contentDescription = "Give Up", tint = PilotFailure)
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Give Up", color = FocusFailure)
+                    Text("Give Up", color = PilotFailure, fontWeight = FontWeight.SemiBold)
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Finish Session Button (Active when >= 80% elapsed)
             Button(
@@ -284,10 +290,10 @@ private fun ActiveFocusView(
                     .testTag("finish_session_button"),
                 shape = RoundedCornerShape(10.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = FocusDarkGreen,
+                    containerColor = PilotDarkGreen,
                     contentColor = Color.White,
-                    disabledContainerColor = Color(0xFFE5E7EB),
-                    disabledContentColor = FocusTextMuted
+                    disabledContainerColor = Color(0xFFE2E8F0),
+                    disabledContentColor = PilotTextMuted
                 )
             ) {
                 Text(
@@ -309,7 +315,6 @@ private fun IdleFocusLauncherView(
     val plan = todayPlan ?: DailyPlanEntity(date = DateUtil.getTodayDateString())
     var selectedDuration by remember { mutableIntStateOf(userSettings.defaultFocusDurationMinutes) }
 
-    // List all three tasks with their status
     val taskEntries = listOf(
         Triple(
             TaskType.MONEY,
@@ -332,10 +337,10 @@ private fun IdleFocusLauncherView(
         modifier = Modifier
             .widthIn(max = 560.dp)
             .fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surface,
-        border = androidx.compose.foundation.BorderStroke(1.dp, FocusBorder),
-        shadowElevation = 2.dp
+        border = androidx.compose.foundation.BorderStroke(1.dp, PilotBorder),
+        shadowElevation = 1.dp
     ) {
         Column(
             modifier = Modifier
@@ -347,13 +352,13 @@ private fun IdleFocusLauncherView(
                 modifier = Modifier
                     .size(56.dp)
                     .clip(CircleShape)
-                    .background(FocusGreenContainer),
+                    .background(PilotGreenContainer),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = Icons.Default.Lock,
                     contentDescription = "Focus",
-                    tint = FocusDarkGreen,
+                    tint = PilotDarkGreen,
                     modifier = Modifier.size(28.dp)
                 )
             }
@@ -364,12 +369,12 @@ private fun IdleFocusLauncherView(
                 text = "Launch Focus Session",
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = FocusTextPrimary
+                color = PilotTextPrimary
             )
             Text(
-                text = "Pick a task and duration to enter undivided focus mode.",
+                text = "Pick a priority and duration to enter undivided focus mode.",
                 style = MaterialTheme.typography.bodySmall,
-                color = FocusTextSecondary,
+                color = PilotTextSecondary,
                 textAlign = TextAlign.Center
             )
 
@@ -380,7 +385,7 @@ private fun IdleFocusLauncherView(
                 text = "Session Duration",
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = FocusTextPrimary,
+                color = PilotTextPrimary,
                 modifier = Modifier.align(Alignment.Start)
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -405,7 +410,7 @@ private fun IdleFocusLauncherView(
                 text = "Select Task to Focus On",
                 style = MaterialTheme.typography.labelMedium,
                 fontWeight = FontWeight.SemiBold,
-                color = FocusTextPrimary,
+                color = PilotTextPrimary,
                 modifier = Modifier.align(Alignment.Start)
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -421,8 +426,8 @@ private fun IdleFocusLauncherView(
                             .clickable { onStartSession(type, title, selectedDuration) }
                             .testTag("select_focus_${type.name.lowercase()}"),
                         shape = RoundedCornerShape(12.dp),
-                        color = if (isDone) Color(0xFFF9FAFB) else MaterialTheme.colorScheme.surface,
-                        border = androidx.compose.foundation.BorderStroke(1.dp, if (isDone) FocusGreenContainer else FocusBorder)
+                        color = if (isDone) Color(0xFFF8FAFC) else MaterialTheme.colorScheme.surface,
+                        border = androidx.compose.foundation.BorderStroke(1.dp, if (isDone) Color(0xFFBBF7D0) else PilotBorder)
                     ) {
                         Row(
                             modifier = Modifier
@@ -438,13 +443,14 @@ private fun IdleFocusLauncherView(
                                     text = title,
                                     style = MaterialTheme.typography.bodyMedium,
                                     fontWeight = FontWeight.SemiBold,
-                                    color = if (isDone) FocusTextMuted else FocusTextPrimary
+                                    color = if (isDone) PilotTextMuted else PilotTextPrimary
                                 )
                                 if (isDone) {
                                     Text(
                                         text = "✓ Completed today",
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = FocusDarkGreen
+                                        color = PilotSuccess,
+                                        fontWeight = FontWeight.Medium
                                     )
                                 }
                             }
@@ -455,11 +461,11 @@ private fun IdleFocusLauncherView(
                                 onClick = { onStartSession(type, title, selectedDuration) },
                                 shape = RoundedCornerShape(8.dp),
                                 colors = ButtonDefaults.buttonColors(
-                                    containerColor = FocusDarkGreen,
+                                    containerColor = PilotDarkGreen,
                                     contentColor = Color.White
                                 )
                             ) {
-                                Text("Start ($selectedDuration m)")
+                                Text("Start ($selectedDuration m)", fontWeight = FontWeight.SemiBold)
                             }
                         }
                     }
@@ -468,3 +474,4 @@ private fun IdleFocusLauncherView(
         }
     }
 }
+

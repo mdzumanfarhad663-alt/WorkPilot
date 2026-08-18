@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -35,6 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.ui.dialogs.BackupDialog
 import com.example.ui.dialogs.EndOfDayReviewDialog
@@ -47,11 +50,13 @@ import com.example.ui.screens.focus.FocusScreen
 import com.example.ui.screens.history.HistoryScreen
 import com.example.ui.screens.setup.FirstTimeSetupScreen
 import com.example.ui.screens.today.TodayScreen
-import com.example.ui.theme.FocusDarkGreen
-import com.example.ui.theme.FocusGreenContainer
-import com.example.ui.theme.FocusLockTheme
-import com.example.ui.theme.FocusTextMuted
-import com.example.ui.theme.FocusTextPrimary
+import com.example.ui.theme.PilotBorder
+import com.example.ui.theme.PilotDarkGreen
+import com.example.ui.theme.PilotGreenContainer
+import com.example.ui.theme.PilotSurface
+import com.example.ui.theme.PilotTextMuted
+import com.example.ui.theme.PilotTextSecondary
+import com.example.ui.theme.WorkPilotTheme
 import com.example.ui.viewmodel.FocusLockUiState
 import com.example.ui.viewmodel.FocusLockViewModel
 import com.example.ui.viewmodel.NavigationTab
@@ -64,7 +69,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            FocusLockTheme {
+            WorkPilotTheme {
                 val uiState by viewModel.uiState.collectAsStateWithLifecycle()
                 val context = LocalContext.current
 
@@ -80,10 +85,12 @@ class MainActivity : ComponentActivity() {
                         onCompleteSetup = { name, hour, minute, dailyTarget, duration ->
                             viewModel.completeFirstTimeSetup(name, hour, minute, dailyTarget, duration)
                         },
-                        modifier = Modifier.fillMaxSize().windowInsetsPadding(WindowInsets.safeDrawing)
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .windowInsetsPadding(WindowInsets.safeDrawing)
                     )
                 } else {
-                    FocusLockMainApp(
+                    WorkPilotMainApp(
                         uiState = uiState,
                         viewModel = viewModel
                     )
@@ -155,7 +162,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun FocusLockMainApp(
+fun WorkPilotMainApp(
     uiState: FocusLockUiState,
     viewModel: FocusLockViewModel
 ) {
@@ -163,96 +170,101 @@ fun FocusLockMainApp(
         modifier = Modifier.fillMaxSize(),
         contentWindowInsets = WindowInsets.safeDrawing,
         bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = FocusDarkGreen,
-                modifier = Modifier
-                    .navigationBarsPadding()
-                    .testTag("bottom_nav_bar")
-            ) {
-                // Today Tab
-                NavigationBarItem(
-                    selected = uiState.selectedTab == NavigationTab.TODAY,
-                    onClick = { viewModel.selectTab(NavigationTab.TODAY) },
-                    icon = {
-                        Icon(
-                            imageVector = if (uiState.selectedTab == NavigationTab.TODAY) Icons.Filled.DateRange else Icons.Outlined.DateRange,
-                            contentDescription = "Today"
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = "Today",
-                            fontWeight = if (uiState.selectedTab == NavigationTab.TODAY) FontWeight.Bold else FontWeight.Normal
-                        )
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = FocusDarkGreen,
-                        selectedTextColor = FocusDarkGreen,
-                        indicatorColor = FocusGreenContainer,
-                        unselectedIconColor = FocusTextMuted,
-                        unselectedTextColor = FocusTextMuted
-                    ),
-                    modifier = Modifier.testTag("tab_today")
-                )
+            androidx.compose.foundation.layout.Column {
+                HorizontalDivider(thickness = 1.dp, color = PilotBorder)
+                NavigationBar(
+                    containerColor = PilotSurface,
+                    contentColor = PilotDarkGreen,
+                    tonalElevation = 0.dp,
+                    modifier = Modifier
+                        .navigationBarsPadding()
+                        .testTag("bottom_nav_bar")
+                ) {
+                    // Today Tab
+                    NavigationBarItem(
+                        selected = uiState.selectedTab == NavigationTab.TODAY,
+                        onClick = { viewModel.selectTab(NavigationTab.TODAY) },
+                        icon = {
+                            Icon(
+                                imageVector = if (uiState.selectedTab == NavigationTab.TODAY) Icons.Filled.DateRange else Icons.Outlined.DateRange,
+                                contentDescription = "Today"
+                            )
+                        },
+                        label = {
+                            Text(
+                                text = "Today",
+                                fontWeight = if (uiState.selectedTab == NavigationTab.TODAY) FontWeight.Bold else FontWeight.Medium
+                            )
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = PilotDarkGreen,
+                            selectedTextColor = PilotDarkGreen,
+                            indicatorColor = PilotGreenContainer,
+                            unselectedIconColor = PilotTextSecondary,
+                            unselectedTextColor = PilotTextSecondary
+                        ),
+                        modifier = Modifier.testTag("tab_today")
+                    )
 
-                // Focus Tab
-                NavigationBarItem(
-                    selected = uiState.selectedTab == NavigationTab.FOCUS,
-                    onClick = { viewModel.selectTab(NavigationTab.FOCUS) },
-                    icon = {
-                        Icon(
-                            imageVector = if (uiState.selectedTab == NavigationTab.FOCUS) Icons.Filled.Lock else Icons.Outlined.Lock,
-                            contentDescription = "Focus"
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = "Focus",
-                            fontWeight = if (uiState.selectedTab == NavigationTab.FOCUS) FontWeight.Bold else FontWeight.Normal
-                        )
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = FocusDarkGreen,
-                        selectedTextColor = FocusDarkGreen,
-                        indicatorColor = FocusGreenContainer,
-                        unselectedIconColor = FocusTextMuted,
-                        unselectedTextColor = FocusTextMuted
-                    ),
-                    modifier = Modifier.testTag("tab_focus")
-                )
+                    // Focus Tab
+                    NavigationBarItem(
+                        selected = uiState.selectedTab == NavigationTab.FOCUS,
+                        onClick = { viewModel.selectTab(NavigationTab.FOCUS) },
+                        icon = {
+                            Icon(
+                                imageVector = if (uiState.selectedTab == NavigationTab.FOCUS) Icons.Filled.Lock else Icons.Outlined.Lock,
+                                contentDescription = "Focus"
+                            )
+                        },
+                        label = {
+                            Text(
+                                text = "Focus",
+                                fontWeight = if (uiState.selectedTab == NavigationTab.FOCUS) FontWeight.Bold else FontWeight.Medium
+                            )
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = PilotDarkGreen,
+                            selectedTextColor = PilotDarkGreen,
+                            indicatorColor = PilotGreenContainer,
+                            unselectedIconColor = PilotTextSecondary,
+                            unselectedTextColor = PilotTextSecondary
+                        ),
+                        modifier = Modifier.testTag("tab_focus")
+                    )
 
-                // History Tab
-                NavigationBarItem(
-                    selected = uiState.selectedTab == NavigationTab.HISTORY,
-                    onClick = { viewModel.selectTab(NavigationTab.HISTORY) },
-                    icon = {
-                        Icon(
-                            imageVector = if (uiState.selectedTab == NavigationTab.HISTORY) Icons.Filled.History else Icons.Outlined.History,
-                            contentDescription = "History"
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = "History",
-                            fontWeight = if (uiState.selectedTab == NavigationTab.HISTORY) FontWeight.Bold else FontWeight.Normal
-                        )
-                    },
-                    colors = NavigationBarItemDefaults.colors(
-                        selectedIconColor = FocusDarkGreen,
-                        selectedTextColor = FocusDarkGreen,
-                        indicatorColor = FocusGreenContainer,
-                        unselectedIconColor = FocusTextMuted,
-                        unselectedTextColor = FocusTextMuted
-                    ),
-                    modifier = Modifier.testTag("tab_history")
-                )
+                    // History Tab
+                    NavigationBarItem(
+                        selected = uiState.selectedTab == NavigationTab.HISTORY,
+                        onClick = { viewModel.selectTab(NavigationTab.HISTORY) },
+                        icon = {
+                            Icon(
+                                imageVector = if (uiState.selectedTab == NavigationTab.HISTORY) Icons.Filled.History else Icons.Outlined.History,
+                                contentDescription = "History"
+                            )
+                        },
+                        label = {
+                            Text(
+                                text = "History",
+                                fontWeight = if (uiState.selectedTab == NavigationTab.HISTORY) FontWeight.Bold else FontWeight.Medium
+                            )
+                        },
+                        colors = NavigationBarItemDefaults.colors(
+                            selectedIconColor = PilotDarkGreen,
+                            selectedTextColor = PilotDarkGreen,
+                            indicatorColor = PilotGreenContainer,
+                            unselectedIconColor = PilotTextSecondary,
+                            unselectedTextColor = PilotTextSecondary
+                        ),
+                        modifier = Modifier.testTag("tab_history")
+                    )
+                }
             }
         }
     ) { innerPadding ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
                 .padding(innerPadding)
         ) {
             when (uiState.selectedTab) {
@@ -296,3 +308,4 @@ fun FocusLockMainApp(
         }
     }
 }
+
